@@ -1,0 +1,2 @@
+# ignore all venv directories
+*/venv/ 
