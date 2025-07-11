@@ -9,7 +9,7 @@ logging.basicConfig(
 )
 
 
-logger = logging.getLogger("ContainerShip-API")
+logger = logging.getLogger("uvicorn")
 
 @app.get("/")
 def read_root():
