@@ -3,20 +3,14 @@ from fastapi.responses import JSONResponse
 import logging
 
 app = FastAPI()
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
-)
 
 
 logger = logging.getLogger("uvicorn")
 
 @app.get("/")
 def read_root():
+    """Root endpoint that returns a welcome message."""
     return {"message": "Welcome to ContainerShip!"}
-
-
-
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
