@@ -1,2 +1,13 @@
 gradio[mcp]
 textblob
+#langchain[openai]
+langchain-chroma>=0.1.2
+langchain-openai
+langchain-text-splitters 
+langchain-community 
+langchain-core
+chromadb>=0.4.1
+unstructured[md]    
+numpy<2.0
+pandas
+python-dotenv

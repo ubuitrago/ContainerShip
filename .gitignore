@@ -1,1 +1,4 @@
 venv/*
+.env
+src/mcp-server/chroma_db/*
+.DS_Store
