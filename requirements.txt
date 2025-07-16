@@ -1,6 +1,6 @@
+docker
 gradio[mcp]
 textblob
-#langchain[openai]
 langchain-chroma>=0.1.2
 langchain-openai
 langchain-text-splitters 
