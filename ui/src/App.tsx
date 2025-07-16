@@ -1,11 +1,13 @@
-import { useState, DragEvent } from 'react';
+import { useState, useEffect, DragEvent } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import type { DockerfileClause } from './types';
+
 
 function App() {
-  const [dockerfileContent, setDockerfileContent] = useState<string>('');
+  const [dockerfileRawContents, setDockerfileRawContents] = useState<string>('');
+  const [clauses, setClauses] = useState<DockerfileClause[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
 
   const [warningLineNumbers, setWarningLineNumbers] = useState<number[]>([]);
 
@@ -28,8 +30,9 @@ function App() {
       if (!response.ok) throw new Error('Upload failed');
       const data = await response.json();
 
-      console.log("Response from backend:", data); // 👈 add this
-      setDockerfileContent(data.contents); // 👈 add this
+      console.log("Response from backend:", data); 
+      setDockerfileRawContents(data.raw_file_contents); 
+      setClauses(data.clauses);
       // setWarningLineNumbers([2,4])
     } catch (error) {
       console.error(error);
@@ -44,21 +47,12 @@ function App() {
     if (file) uploadFile(file);
   };
 
-  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    const file = event.dataTransfer.files?.[0];
-    if (file) uploadFile(file);
-  };
-
-  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = () => {
-    setIsDragging(false);
-  };
+  useEffect(() => {
+    if (clauses.length > 0) {
+      console.log("Clauses loaded:", clauses);
+      // safe to process clauses here
+    }
+  }, [clauses]);
 
   return (
   <div
@@ -78,10 +72,10 @@ function App() {
         alignItems: 'center',     // ✅ center child items horizontally
       }}
     >
-      <h1>Dockerfile Viewer</h1>
+      <h1>ContainerShip</h1>
 
       {/* ✅ Drag-and-Drop Area */}
-      <div
+      {/* <div
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -98,7 +92,7 @@ function App() {
         }}
       >
         <p>Drag & drop your <strong>Dockerfile</strong> here</p>
-      </div>
+      </div> */}
 
       {/* ✅ File Upload Button */}
       <div style={{ marginBottom: '2rem' }}>
@@ -126,7 +120,7 @@ function App() {
       {/* ✅ Show Dockerfile Contents */}
       {loading && <p>Uploading...</p>}
 
-      {dockerfileContent && (
+      {dockerfileRawContents && (
         <div style={{ width: '100%', maxWidth: '800px' }}>
           <h2 style={{ textAlign: 'center' }}>Uploaded Dockerfile:</h2>
           <SyntaxHighlighter
@@ -152,7 +146,7 @@ function App() {
               fontSize: '0.9rem',
             }}
           >
-            {dockerfileContent}
+            {dockerfileRawContents}
           </SyntaxHighlighter>
         </div>
       )}

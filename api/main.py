@@ -1,10 +1,10 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import logging
+from process import DockerfileContents
+from utils import logger
 
 app = FastAPI()
-logger = logging.getLogger("uvicorn")
 
 # Adjust this to match your frontend's URL
 origins = [
@@ -20,7 +20,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/")
 def read_root():
     """Root endpoint that returns a welcome message."""
@@ -28,17 +27,19 @@ def read_root():
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
+    
     dockerfile_contents_bytes = await file.read()
     file_size_in_bytes = len(dockerfile_contents_bytes)
     dockerfile_contents_as_string = dockerfile_contents_bytes.decode('utf-8')
-
+    dockerfile_contents_as_lines = dockerfile_contents_as_string.split("\n")
+    guard_line = "-"* max(len(line) for line in dockerfile_contents_as_lines)
 
     logger.info(f"Received file: {file.filename}, size: {file_size_in_bytes} bytes")
-    logger.info(f"File contents: {dockerfile_contents_as_string}")
-    
-    return JSONResponse(content={
-        "filename": file.filename,
-        "content_type": file.content_type,
-        "file_size_bytes": file_size_in_bytes,
-        "contents": dockerfile_contents_as_string
-    })
+    logger.info(f"File contents are logged line-by-line below.")
+    logger.info(guard_line)
+    for line in dockerfile_contents_as_lines:
+        logger.info(line)
+    logger.info(guard_line)
+
+    dockerfile_contents = DockerfileContents(dockerfile_contents_as_string)
+    return JSONResponse(content=dockerfile_contents.as_dict(), status_code=200)
