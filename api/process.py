@@ -17,7 +17,7 @@ class DockerfileClause:
         self.recommendations: str = "Here are some recommendations for this clause."
 
     def __repr__(self):
-        return f"DockerfileClause(start_line={self.start_line_number}, end_line={self.end_line_number}, lines={self.lines})"
+        return f"DockerfileClause(lines={self.lines})"
     
     def as_dict(self):
         return {
@@ -28,7 +28,7 @@ class DockerfileClause:
         }
     
 
-class DockerfileContents:
+class DockerfileAnalysis:
     def __init__(self, raw_file_contents: str):
         self.raw_file_contents: str = raw_file_contents
         self.clauses: list[DockerfileClause] = []
@@ -46,11 +46,6 @@ class DockerfileContents:
                 
             # Add the line to the current list of lines for the clause
             dockerfile_lines_in_current_clause.append(DockerfileLine(i + 1, raw_line))
-
-        
-
-    def __repr__(self):
-        return f"DockerfileContents(lines={self.lines})"
 
     def as_dict(self):
         return {

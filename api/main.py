@@ -1,7 +1,7 @@
 from fastapi import FastAPI, File, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from process import DockerfileContents
+from process import DockerfileAnalysis
 from utils import logger
 
 app = FastAPI()
@@ -27,19 +27,15 @@ def read_root():
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
-    
+    """Endpoint to upload a Dockerfile and process its contents."""
     dockerfile_contents_bytes = await file.read()
-    file_size_in_bytes = len(dockerfile_contents_bytes)
     dockerfile_contents_as_string = dockerfile_contents_bytes.decode('utf-8')
     dockerfile_contents_as_lines = dockerfile_contents_as_string.split("\n")
-    guard_line = "-"* max(len(line) for line in dockerfile_contents_as_lines)
+    guard_line = "-" * max(len(line) for line in dockerfile_contents_as_lines)
 
-    logger.info(f"Received file: {file.filename}, size: {file_size_in_bytes} bytes")
+    logger.info(f"Received file: {file.filename}, size: {len(dockerfile_contents_bytes)} bytes")
     logger.info(f"File contents are logged line-by-line below.")
-    logger.info(guard_line)
-    for line in dockerfile_contents_as_lines:
-        logger.info(line)
-    logger.info(guard_line)
+    for line in [guard_line] + dockerfile_contents_as_lines + [guard_line]: logger.info(line)
 
-    dockerfile_contents = DockerfileContents(dockerfile_contents_as_string)
-    return JSONResponse(content=dockerfile_contents.as_dict(), status_code=200)
+    dockerfile_analysis = DockerfileAnalysis(dockerfile_contents_as_string)
+    return JSONResponse(content=dockerfile_analysis.as_dict(), status_code=200)
