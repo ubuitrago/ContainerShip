@@ -82,7 +82,7 @@ function App() {
       <h2
         style={{
           whiteSpace: 'nowrap',
-          textShadow: '2px 2px 9px rgba(0,0,0,0.4)'
+          textShadow: '2px 2px 9px rgba(0,0,0,0.25)'
         }}
       >
         Lean & Secure Images for Smooth Sailing
