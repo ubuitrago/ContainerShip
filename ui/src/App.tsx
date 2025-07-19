@@ -1,3 +1,4 @@
+import logo from './assets/logo.svg';
 import { useState, useEffect, DragEvent } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -55,24 +56,38 @@ function App() {
   }, [clauses]);
 
   return (
-  <div
+    <div
     style={{
-      fontFamily: 'sans-serif',
-      width: '100%',
-      padding: '2rem',
-      boxSizing: 'border-box',
-    }}
-  >
+      margin: 'auto',
+      maxWidth: '335px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      }}
+    >
+    {/* Logo at the center top */}
+    <img
+      src={logo}
+      alt="Logo"
+      className="logo"
+      style={{ marginBottom: '-1rem', marginTop: '-1.75rem' }}
+    />
     <div
       style={{
-        margin: '0 auto',         // ✅ center horizontally
-        maxWidth: '800px',        // ✅ prevent it from stretching too far
         display: 'flex',
         flexDirection: 'column',  // ✅ vertical stack
         alignItems: 'center',     // ✅ center child items horizontally
       }}
     >
-      <h1>ContainerShip</h1>
+      <h2
+        style={{
+          whiteSpace: 'nowrap',
+          textShadow: '2px 2px 9px rgba(0,0,0,0.4)'
+        }}
+      >
+        Lean & Secure Images for Smooth Sailing
+      </h2>
+  
 
       {/* ✅ Drag-and-Drop Area */}
       {/* <div
@@ -153,7 +168,7 @@ function App() {
 
     </div>
   </div>
-);
+    );
 }
 
 export default App;
