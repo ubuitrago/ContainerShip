@@ -10,6 +10,5 @@
 # Run
 
 From within the "mcp-server" folder, run:
-```
-python rag_doc_chain.py
-```
+
+`python rag_doc_chain.py`
