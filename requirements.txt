@@ -6,8 +6,12 @@ langchain-openai
 langchain-text-splitters 
 langchain-community 
 langchain-core
+openai
+tiktoken
 chromadb>=0.4.1
 unstructured[md]    
 numpy<2.0
 pandas
 python-dotenv
+mcp
+mcp[cli]
