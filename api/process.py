@@ -1,5 +1,6 @@
 from utils import line_starts_with_reserved_instruction
 
+
 class DockerfileLine:
     def __init__(self, line_number: int, content: str):
         self.line_number = line_number
@@ -22,7 +23,7 @@ class DockerfileClause:
     def as_dict(self):
         return {
             "line_numbers": self.line_numbers,
-            "lines": {line.line_number: line.content for line in self.lines},
+            "lines": { line.line_number: line.content for line in self.lines },
             "recommendations": self.recommendations,
             "content": self.content
         }
@@ -49,6 +50,6 @@ class DockerfileAnalysis:
 
     def as_dict(self):
         return {
-            "clauses": [clause.as_dict() for clause in self.clauses],
+            "clauses": [ clause.as_dict() for clause in self.clauses ],
             "raw_file_contents": self.raw_file_contents
         }
