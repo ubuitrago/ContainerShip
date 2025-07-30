@@ -1,4 +1,4 @@
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from rag_doc_chain import answer_question
 # Creat MCP server instance
 mcp = FastMCP("Docker Expert")
@@ -18,4 +18,4 @@ def docker_docs(question: str) -> str:
 
 if __name__ == "__main__":
     # Launch the MCP server with the FastMCP interface
-    mcp.run(port=3001)
+    mcp.run(transport="http", host="127.0.0.1", port=8000)

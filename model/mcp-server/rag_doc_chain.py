@@ -47,7 +47,6 @@ if not os.path.exists(CHROMA_DIR):
         collection_name="docker_docs",   
     )
 
-    vector_store.persist()
 else:
     # just reload existing index
     embeddings = OpenAIEmbeddings()

@@ -1,11 +1,9 @@
 {
-  "servers": [
-    {
-      "name": "MCP Server",
-      "transport": {
-        "type": "stdio",
-        "url": "http://localhost:7860/gradio_api/mcp/stdio"
-      }
+    "mcpServers": {
+        "default-server": {
+            "type": "streamable-http",
+            "url": "http://localhost:8000/http",
+            "note": "For Streamable HTTP connections, add this URL directly in your MCP Client"
+        }
     }
-  ]
 }
