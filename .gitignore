@@ -1,4 +1,5 @@
-venv/*
 .env
-src/mcp-server/chroma_db/*
+model/mcp-server/chroma_db/*
 .DS_Store
+# ignore all venv directories
+*/venv/ 
