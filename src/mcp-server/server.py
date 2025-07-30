@@ -18,4 +18,4 @@ def docker_docs(question: str) -> str:
 
 if __name__ == "__main__":
     # Launch the MCP server with the FastMCP interface
-    mcp.run(transport="stdio", port=3001)
+    mcp.run(port=3001)
