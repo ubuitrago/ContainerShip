@@ -1,8 +1,8 @@
 import logo from './assets/logo.svg';
-import { useState, useEffect, DragEvent } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { useState, useEffect } from 'react';
 import type { DockerfileClause } from './types';
+import DockerfileDisplay from './components/DockerfileDisplay';
+import ClauseCard from './components/ClauseCard';
 
 
 function App() {
@@ -11,6 +11,31 @@ function App() {
   const [loading, setLoading] = useState<boolean>(false);
 
   const [warningLineNumbers, setWarningLineNumbers] = useState<number[]>([]);
+  const [lineToClauseMap, setLineToClauseMap] = useState<{ [lineNumber: number]: number }>({});
+  const [activeClauseIndex, setActiveClauseIndex] = useState<number>(0);
+
+  const handleLineClick = (lineNumber: number) => {
+    if (warningLineNumbers.includes(lineNumber)) {
+      const clauseIndex = lineToClauseMap[lineNumber];
+      setActiveClauseIndex(clauseIndex);
+      
+      // Scroll to the recommendations section
+      const recommendationsSection = document.getElementById('recommendations-section');
+      if (recommendationsSection) {
+        recommendationsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const navigateClause = (direction: 'prev' | 'next') => {
+    if (clauses.length === 0) return;
+    
+    if (direction === 'prev') {
+      setActiveClauseIndex((prev) => prev === 0 ? clauses.length - 1 : prev - 1);
+    } else {
+      setActiveClauseIndex((prev) => prev === clauses.length - 1 ? 0 : prev + 1);
+    }
+  };
 
   const uploadFile = async (file: File) => {
     if (file.name !== 'Dockerfile') {
@@ -34,7 +59,20 @@ function App() {
       console.log("Response from backend:", data); 
       setDockerfileRawContents(data.raw_file_contents); 
       setClauses(data.clauses);
-      // setWarningLineNumbers([2,4])
+      
+      // Extract line numbers and map them to their clause index
+      const allWarningLines: number[] = [];
+      const lineToClause: { [lineNumber: number]: number } = {};
+      
+      data.clauses.forEach((clause: DockerfileClause, clauseIndex: number) => {
+        clause.line_numbers.forEach((lineNum: number) => {
+          allWarningLines.push(lineNum);
+          lineToClause[lineNum] = clauseIndex;
+        });
+      });
+      
+      setWarningLineNumbers(allWarningLines);
+      setLineToClauseMap(lineToClause);
     } catch (error) {
       console.error(error);
       alert('Something went wrong.');
@@ -55,14 +93,33 @@ function App() {
     }
   }, [clauses]);
 
+  // Keyboard navigation for clauses
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (clauses.length === 0) return;
+      
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigateClause('prev');
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        navigateClause('next');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [clauses.length]);
+
   return (
     <div
     style={{
       margin: 'auto',
-      maxWidth: '335px',
+      maxWidth: dockerfileRawContents ? '800px' : '335px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
+      padding: '0 1rem',
       }}
     >
     {/* Logo at the center top */}
@@ -87,27 +144,6 @@ function App() {
       >
         Lean & Secure Images for Smooth Sailing
       </h2>
-  
-
-      {/* ✅ Drag-and-Drop Area */}
-      {/* <div
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        style={{
-          border: isDragging ? '2px dashed #007bff' : '2px dashed #ccc',
-          borderRadius: '8px',
-          padding: '2rem',
-          width: '100%',
-          maxWidth: '600px',
-          textAlign: 'center',
-          backgroundColor: isDragging ? '#eef7ff' : '#fafafa',
-          transition: '0.3s',
-          marginBottom: '1.5rem',
-        }}
-      >
-        <p>Drag & drop your <strong>Dockerfile</strong> here</p>
-      </div> */}
 
       {/* ✅ File Upload Button */}
       <div style={{ marginBottom: '2rem' }}>
@@ -136,34 +172,29 @@ function App() {
       {loading && <p>Uploading...</p>}
 
       {dockerfileRawContents && (
-        <div style={{ width: '100%', maxWidth: '800px' }}>
-          <h2 style={{ textAlign: 'center' }}>Uploaded Dockerfile:</h2>
-          <SyntaxHighlighter
-            language="docker"
-            showLineNumbers
-            wrapLines={true}
-            lineProps={(lineNumber: number) => {
-              if (warningLineNumbers.includes(lineNumber)) {
-                return {
-                  style: {
-                    backgroundColor: '#fff3cd',
-                    position: 'relative',
-                  },
-                  title: 'This line has a warning', // shows on hover
-                };
-              }
-              return {};
-            }}
-            style={nord}
-            customStyle={{
-              borderRadius: '8px',
-              padding: '1rem',
-              fontSize: '0.9rem',
-            }}
-          >
-            {dockerfileRawContents}
-          </SyntaxHighlighter>
-        </div>
+        <>
+          <DockerfileDisplay
+            dockerfileContents={dockerfileRawContents}
+            warningLineNumbers={warningLineNumbers}
+            lineToClauseMap={lineToClauseMap}
+            clauses={clauses}
+            activeClauseIndex={activeClauseIndex}
+            onLineClick={handleLineClick}
+          />
+          
+          {/* Display recommendations for highlighted lines */}
+          {warningLineNumbers.length > 0 && (
+            <ClauseCard
+              clause={clauses[activeClauseIndex]}
+              isActive={true}
+              onNavigate={navigateClause}
+              onSelectClause={setActiveClauseIndex}
+              currentIndex={activeClauseIndex}
+              totalCount={clauses.length}
+              allClauses={clauses}
+            />
+          )}
+        </>
       )}
 
     </div>
