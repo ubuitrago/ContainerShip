@@ -1,12 +1,13 @@
 import logo from './assets/logo.svg';
 import { useState, useEffect } from 'react';
-import type { DockerfileClause } from './types';
+import type { DockerfileClause, DockerfileAnalysisResponse } from './types';
 import DockerfileDisplay from './components/DockerfileDisplay';
 import ClauseCard from './components/ClauseCard';
 
 
 function App() {
   const [dockerfileRawContents, setDockerfileRawContents] = useState<string>('');
+  const [dockerfileOptimizedContents, setDockerfileOptimizedContents] = useState<string>('');
   const [clauses, setClauses] = useState<DockerfileClause[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -54,10 +55,11 @@ function App() {
       });
 
       if (!response.ok) throw new Error('Upload failed');
-      const data = await response.json();
+      const data: DockerfileAnalysisResponse = await response.json();
 
       console.log("Response from backend:", data); 
       setDockerfileRawContents(data.raw_file_contents); 
+      setDockerfileOptimizedContents(data.optimized_file_contents);
       setClauses(data.clauses);
       
       // Extract line numbers and map them to their clause index
@@ -115,7 +117,7 @@ function App() {
     <div
     style={{
       margin: 'auto',
-      maxWidth: dockerfileRawContents ? '800px' : '335px',
+      maxWidth: dockerfileRawContents ? '900px' : '335px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -172,29 +174,66 @@ function App() {
       {loading && <p>Uploading...</p>}
 
       {dockerfileRawContents && (
-        <>
-          <DockerfileDisplay
-            dockerfileContents={dockerfileRawContents}
-            warningLineNumbers={warningLineNumbers}
-            lineToClauseMap={lineToClauseMap}
-            clauses={clauses}
-            activeClauseIndex={activeClauseIndex}
-            onLineClick={handleLineClick}
-          />
-          
-          {/* Display recommendations for highlighted lines */}
-          {warningLineNumbers.length > 0 && (
-            <ClauseCard
-              clause={clauses[activeClauseIndex]}
-              isActive={true}
-              onNavigate={navigateClause}
-              onSelectClause={setActiveClauseIndex}
-              currentIndex={activeClauseIndex}
-              totalCount={clauses.length}
-              allClauses={clauses}
+        <div style={{ width: '100%', maxWidth: '900px' }}>
+          {/* Original Dockerfile Section */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+              textAlign: 'center',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              marginBottom: '1rem',
+              color: '#dc3545'
+            }}>
+              📋 Original Dockerfile
+            </div>
+            <DockerfileDisplay
+              dockerfileContents={dockerfileRawContents}
+              warningLineNumbers={warningLineNumbers}
+              lineToClauseMap={lineToClauseMap}
+              clauses={clauses}
+              activeClauseIndex={activeClauseIndex}
+              onLineClick={handleLineClick}
+              showHeader={false}
             />
+          </div>
+          
+          {/* Recommendations Section */}
+          {warningLineNumbers.length > 0 && (
+            <div style={{ marginBottom: '2rem' }}>
+              <ClauseCard
+                clause={clauses[activeClauseIndex]}
+                isActive={true}
+                onNavigate={navigateClause}
+                currentIndex={activeClauseIndex}
+                totalCount={clauses.length}
+              />
+            </div>
           )}
-        </>
+
+          {/* Optimized Dockerfile Section */}
+          {dockerfileOptimizedContents && (
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{
+                textAlign: 'center',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                marginBottom: '1rem',
+                color: '#28a745'
+              }}>
+                🚀 Optimized Dockerfile
+              </div>
+              <DockerfileDisplay
+                dockerfileContents={dockerfileOptimizedContents}
+                warningLineNumbers={[]}
+                lineToClauseMap={{}}
+                clauses={[]}
+                activeClauseIndex={0}
+                onLineClick={() => {}}
+                showHeader={false}
+              />
+            </div>
+          )}
+        </div>
       )}
 
     </div>

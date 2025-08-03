@@ -4,3 +4,9 @@ export type DockerfileClause = {
   recommendations: string;                // message to show
   content: string;                        // entire clause
 };
+
+export type DockerfileAnalysisResponse = {
+  clauses: DockerfileClause[];
+  raw_file_contents: string;
+  optimized_file_contents: string;
+};

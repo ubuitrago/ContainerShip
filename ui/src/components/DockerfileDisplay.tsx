@@ -10,6 +10,8 @@ interface DockerfileDisplayProps {
   clauses: DockerfileClause[];
   activeClauseIndex: number;
   onLineClick: (lineNumber: number) => void;
+  showHeader?: boolean;
+  headerText?: string;
 }
 
 const DockerfileDisplay: React.FC<DockerfileDisplayProps> = ({
@@ -19,10 +21,16 @@ const DockerfileDisplay: React.FC<DockerfileDisplayProps> = ({
   clauses,
   activeClauseIndex,
   onLineClick,
+  showHeader = false,
+  headerText = "Dockerfile",
 }) => {
   return (
     <div style={{ width: '100%' }}>
-      <h2 style={{ textAlign: 'center' }}>Uploaded Dockerfile:</h2>
+      {showHeader && (
+        <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>
+          {headerText}
+        </h2>
+      )}
       
       {/* Help text */}
       {warningLineNumbers.length > 0 && (

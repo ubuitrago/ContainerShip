@@ -5,20 +5,16 @@ interface ClauseCardProps {
   clause: DockerfileClause;
   isActive: boolean;
   onNavigate: (direction: 'prev' | 'next') => void;
-  onSelectClause: (index: number) => void;
   currentIndex: number;
   totalCount: number;
-  allClauses: DockerfileClause[];
 }
 
 const ClauseCard: React.FC<ClauseCardProps> = ({
   clause,
   isActive,
   onNavigate,
-  onSelectClause,
   currentIndex,
   totalCount,
-  allClauses,
 }) => {
   if (!isActive) return null;
 
@@ -26,15 +22,14 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
 
   return (
     <div style={{ width: '100%' }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>Recommendations:</h2>
+      <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>Recommendations:</h2>
       
       {/* Horizontal Navigation Controls */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: '1rem',
-        gap: '1rem'
+        marginBottom: '1rem'
       }}>
         <button
           onClick={() => onNavigate('prev')}
@@ -59,29 +54,14 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
           ←
         </button>
         
-        {/* Horizontal pagination dots */}
-        <div style={{
-          display: 'flex',
-          gap: '0.5rem',
-          alignItems: 'center'
+        {/* Recommendation counter */}
+        <div style={{ 
+          textAlign: 'center', 
+          color: '#856404',
+          fontSize: '1.1rem',
+          fontWeight: 'bold'
         }}>
-          {allClauses.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => onSelectClause(index)}
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                border: 'none',
-                backgroundColor: index === currentIndex ? '#ffc107' : '#dee2e6',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                transform: index === currentIndex ? 'scale(1.2)' : 'scale(1)',
-              }}
-              title={`Go to recommendation ${index + 1}`}
-            />
-          ))}
+          📋 Recommendation {currentIndex + 1} of {totalCount}
         </div>
         
         <button
@@ -111,16 +91,6 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
       <div>
         {/* Clause Card Content */}
         <div style={{ width: '100%' }}>
-          <div style={{ 
-            textAlign: 'center', 
-            color: '#856404',
-            marginBottom: '1rem',
-            fontSize: '1.1rem',
-            fontWeight: 'bold'
-          }}>
-            📋 Recommendation {currentIndex + 1} of {totalCount}
-          </div>
-
           {/* Display active clause card */}
           <div 
             id="recommendations-section"
