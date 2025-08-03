@@ -3,6 +3,7 @@ model/mcp-server/chroma_db/*
 .DS_Store
 # ignore all venv directories
 ./venv/ 
+api/venv
 __pycache__/
 *.pyc
 .vite   
