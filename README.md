@@ -2,6 +2,30 @@
 Web-App Container optimizer via LLMs
 
 # Development
+## Front-End (React)
+Navigate to `ui/` and start the vite environment: 
+```bash
+cd ui
+npm run dev
+```
+
+## Backend (FastAPI)
+First, ensure that you have a virtual environment active with the needed packages:
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then start the FastAPI server:
+```bash
+uvicorn api.main:app --reload --port 8001
+```
+
+The API will be available at:
+- API Root: http://localhost:8001/
+- Interactive Docs: http://localhost:8001/docs
+- Alternative Docs: http://localhost:8001/redoc
 
 ## MCP Server
 First, ensure that you have a virtual environment active with the needed packages. Below are the steps followed to achieve that.
@@ -39,3 +63,8 @@ The screenshot below is what you should see from MCP Inspector when testing the 
 
 
 <img src="docs/img/MCP-Inspector.png" max_width="700px">
+
+## Testing
+
+Use the bad Dockerfile
+SORUCE: https://www.infoq.com/articles/docker-size-dive/

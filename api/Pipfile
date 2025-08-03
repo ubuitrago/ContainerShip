@@ -10,6 +10,7 @@ click = "*"
 exceptiongroup = "*"
 python-multipart = "*"
 starlette = "*"
+fastmcp = "*"
 
 [dev-packages]
 

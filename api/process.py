@@ -1,4 +1,5 @@
 from utils import line_starts_with_reserved_instruction
+from mcp_client import create_client, ask_docker_docs
 
 
 class DockerfileLine:
@@ -55,3 +56,12 @@ class DockerfileAnalysis:
             "raw_file_contents": self.raw_file_contents,
             "optimized_file_contents": self.optimized_file_contents
         }
+
+    async def annotate(self):
+        """Annotate the clauses with recommendations."""
+        client = await create_client()
+        async with client:
+            for clause in self.clauses:
+                question = f"Provide recommendations for improving the following Dockerfile clause:\n{clause.content}"
+                clause.recommendations = await ask_docker_docs(client, question)
+                yield clause.recommendations

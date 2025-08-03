@@ -91,7 +91,8 @@ function App() {
   useEffect(() => {
     if (clauses.length > 0) {
       console.log("Clauses loaded:", clauses);
-      // safe to process clauses here
+      // Start streaming analysis automatically when clauses are loaded
+      // streamFullAnalysis(); // TODO: Implement this function
     }
   }, [clauses]);
 
@@ -146,7 +147,6 @@ function App() {
       >
         Lean & Secure Images for Smooth Sailing
       </h2>
-
       {/* ✅ File Upload Button */}
       <div style={{ marginBottom: '2rem' }}>
         <label
