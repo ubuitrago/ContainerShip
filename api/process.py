@@ -1,5 +1,5 @@
-from api.utils import line_starts_with_reserved_instruction
-from api.mcp_client import create_client, ask_docker_docs
+from utils import line_starts_with_reserved_instruction
+from mcp_client import create_client, ask_docker_docs
 
 
 class DockerfileLine:
@@ -33,6 +33,7 @@ class DockerfileClause:
 class DockerfileAnalysis:
     def __init__(self, raw_file_contents: str):
         self.raw_file_contents: str = raw_file_contents
+        self.optimized_file_contents: str = raw_file_contents # Placeholder for optimized contents, replace with actual optimization logic later
         self.clauses: list[DockerfileClause] = []
 
         dockerfile_lines_in_current_clause: list[DockerfileLine] = []
@@ -52,7 +53,8 @@ class DockerfileAnalysis:
     def as_dict(self):
         return {
             "clauses": [ clause.as_dict() for clause in self.clauses ],
-            "raw_file_contents": self.raw_file_contents
+            "raw_file_contents": self.raw_file_contents,
+            "optimized_file_contents": self.optimized_file_contents
         }
 
     async def annotate(self):

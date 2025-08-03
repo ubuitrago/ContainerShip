@@ -2,8 +2,8 @@ from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from api.process import DockerfileAnalysis
-from api.utils import logger
+from process import DockerfileAnalysis
+from utils import logger
 
 app = FastAPI()
 

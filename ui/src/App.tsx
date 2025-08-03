@@ -1,57 +1,40 @@
 import logo from './assets/logo.svg';
 import { useState, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import type { DockerfileClause } from './types';
+import type { DockerfileClause, DockerfileAnalysisResponse } from './types';
+import DockerfileDisplay from './components/DockerfileDisplay';
+import ClauseCard from './components/ClauseCard';
 
 
 function App() {
   const [dockerfileRawContents, setDockerfileRawContents] = useState<string>('');
+  const [dockerfileOptimizedContents, setDockerfileOptimizedContents] = useState<string>('');
   const [clauses, setClauses] = useState<DockerfileClause[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   const [warningLineNumbers, setWarningLineNumbers] = useState<number[]>([]);
-  
-  // New state for streaming
-  const [fullAnalysis, setFullAnalysis] = useState<string>('');
-  const [isStreamingActive, setIsStreamingActive] = useState<boolean>(false);
+  const [lineToClauseMap, setLineToClauseMap] = useState<{ [lineNumber: number]: number }>({});
+  const [activeClauseIndex, setActiveClauseIndex] = useState<number>(0);
 
-  const streamFullAnalysis = async () => {
+  const handleLineClick = (lineNumber: number) => {
+    if (warningLineNumbers.includes(lineNumber)) {
+      const clauseIndex = lineToClauseMap[lineNumber];
+      setActiveClauseIndex(clauseIndex);
+      
+      // Scroll to the recommendations section
+      const recommendationsSection = document.getElementById('recommendations-section');
+      if (recommendationsSection) {
+        recommendationsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  const navigateClause = (direction: 'prev' | 'next') => {
     if (clauses.length === 0) return;
     
-    setFullAnalysis('');
-    setIsStreamingActive(true);
-    
-    try {
-      // Stream analysis for all clauses as one combined response
-      const allClausesContent = clauses.map(clause => clause.content).join('\n\n');
-      // Log the content being sent for debugging
-      console.log("Sending combined clauses content for analysis:", allClausesContent);
-      const response = await fetch('http://localhost:8001/analyze/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(allClausesContent),
-      });
-
-      if (!response.ok) throw new Error('Streaming failed');
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      
-      if (!reader) throw new Error('No reader available');
-      
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value, { stream: true });
-        setFullAnalysis(prev => prev + chunk);
-      }
-    } catch (error) {
-      console.error('Streaming error:', error);
-      setFullAnalysis('Error: Failed to analyze Dockerfile');
-    } finally {
-      setIsStreamingActive(false);
+    if (direction === 'prev') {
+      setActiveClauseIndex((prev) => prev === 0 ? clauses.length - 1 : prev - 1);
+    } else {
+      setActiveClauseIndex((prev) => prev === clauses.length - 1 ? 0 : prev + 1);
     }
   };
 
@@ -66,18 +49,32 @@ function App() {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8001/upload', {
+      const response = await fetch('http://localhost:8000/upload', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) throw new Error('Upload failed');
-      const data = await response.json();
+      const data: DockerfileAnalysisResponse = await response.json();
 
       console.log("Response from backend:", data); 
       setDockerfileRawContents(data.raw_file_contents); 
+      setDockerfileOptimizedContents(data.optimized_file_contents);
       setClauses(data.clauses);
-      // setWarningLineNumbers([2,4])
+      
+      // Extract line numbers and map them to their clause index
+      const allWarningLines: number[] = [];
+      const lineToClause: { [lineNumber: number]: number } = {};
+      
+      data.clauses.forEach((clause: DockerfileClause, clauseIndex: number) => {
+        clause.line_numbers.forEach((lineNum: number) => {
+          allWarningLines.push(lineNum);
+          lineToClause[lineNum] = clauseIndex;
+        });
+      });
+      
+      setWarningLineNumbers(allWarningLines);
+      setLineToClauseMap(lineToClause);
     } catch (error) {
       console.error(error);
       alert('Something went wrong.');
@@ -95,29 +92,39 @@ function App() {
     if (clauses.length > 0) {
       console.log("Clauses loaded:", clauses);
       // Start streaming analysis automatically when clauses are loaded
-      streamFullAnalysis();
+      // streamFullAnalysis(); // TODO: Implement this function
     }
   }, [clauses]);
 
+  // Keyboard navigation for clauses
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (clauses.length === 0) return;
+      
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        navigateClause('prev');
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        navigateClause('next');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [clauses.length]);
+
   return (
-    <>
-      <style>
-        {`
-          @keyframes blink {
-            0%, 50% { opacity: 1; }
-            51%, 100% { opacity: 0; }
-          }
-        `}
-      </style>
-      <div
-      style={{
-        margin: 'auto',
-        maxWidth: '500px', // Increased for side-by-side layout
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        }}
-      >
+    <div
+    style={{
+      margin: 'auto',
+      maxWidth: dockerfileRawContents ? '900px' : '335px',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      padding: '0 1rem',
+      }}
+    >
     {/* Logo at the center top */}
     <img
       src={logo}
@@ -167,139 +174,63 @@ function App() {
       {loading && <p>Uploading...</p>}
 
       {dockerfileRawContents && (
-        <div style={{ width: '100%', maxWidth: '1200px' }}>
-          {/* Side-by-side layout for Dockerfile and Analysis */}
-          <div 
-            style={{
-              display: 'flex',
-              gap: '2rem',
-              marginBottom: '2rem',
-              minHeight: '400px'
-            }}
-          >
-            {/* Left side - Original Dockerfile */}
-            <div style={{ flex: '0 0 40%' }}>
-              <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                Original Dockerfile
-              </h2>
-              <SyntaxHighlighter
-                language="docker"
-                showLineNumbers
-                wrapLines={true}
-                lineProps={(lineNumber: number) => {
-                  if (warningLineNumbers.includes(lineNumber)) {
-                    return {
-                      style: {
-                        backgroundColor: '#fff3cd',
-                        position: 'relative',
-                      },
-                      title: 'This line has a warning',
-                    };
-                  }
-                  return {};
-                }}
-                style={nord}
-                customStyle={{
-                  borderRadius: '8px',
-                  padding: '1rem',
-                  fontSize: '0.9rem',
-                  height: '400px',
-                  overflow: 'auto'
-                }}
-              >
-                {dockerfileRawContents}
-              </SyntaxHighlighter>
-            </div>
-
-            {/* Right side - Live Analysis */}
-            <div style={{ flex: '1' }}>
-              <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                Live Analysis
-              </h2>
-              <div 
-                style={{
-                  border: '1px solid #ddd',
-                  borderRadius: '8px',
-                  padding: '1.5rem',
-                  backgroundColor: '#2E3440',
-                  height: '400px',
-                  overflow: 'auto',
-                  whiteSpace: 'pre-wrap',
-                  lineHeight: '1.6',
-                  fontFamily: 'system-ui, -apple-system, sans-serif',
-                  fontSize: '0.95rem',
-                  color: '#D8DEE9'
-                }}
-              >
-                {isStreamingActive && !fullAnalysis && (
-                  <div style={{ color: '#88C0D0', fontStyle: 'italic' }}>
-                    Analyzing your Dockerfile...
-                    <span 
-                      style={{ 
-                        animation: 'blink 1s infinite',
-                        marginLeft: '4px'
-                      }}
-                    >
-                      |
-                    </span>
-                  </div>
-                )}
-                {fullAnalysis && (
-                  <>
-                    {fullAnalysis}
-                    {isStreamingActive && (
-                      <span 
-                        style={{ 
-                          animation: 'blink 1s infinite',
-                          marginLeft: '2px',
-                          color: '#D8DEE9'
-                        }}
-                      >
-                        |
-                      </span>
-                    )}
-                  </>
-                )}
-                {!isStreamingActive && !fullAnalysis && (
-                  <div style={{ color: '#4C566A', fontStyle: 'italic' }}>
-                    Ready to analyze...
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom - Optimized Dockerfile (centered) */}
-          {!isStreamingActive && fullAnalysis && (
-            <div style={{ 
-              display: 'flex', 
-              flexDirection: 'column', 
-              alignItems: 'center',
-              marginTop: '3rem'
+        <div style={{ width: '100%', maxWidth: '900px' }}>
+          {/* Original Dockerfile Section */}
+          <div style={{ marginBottom: '2rem' }}>
+            <div style={{
+              textAlign: 'center',
+              fontSize: '1.1rem',
+              fontWeight: 'bold',
+              marginBottom: '1rem',
+              color: '#dc3545'
             }}>
-              <h2 style={{ textAlign: 'center', marginBottom: '1rem' }}>
-                Optimized Dockerfile
-              </h2>
-              <div style={{ width: '80%', maxWidth: '600px' }}>
-                <div
-                  style={{
-                    border: '2px solid #A3BE8C',
-                    borderRadius: '8px',
-                    padding: '1.5rem',
-                    backgroundColor: '#3B4252',
-                    fontFamily: 'Monaco, Menlo, "Ubuntu Mono", monospace',
-                    fontSize: '0.9rem',
-                    color: '#D8DEE9',
-                    whiteSpace: 'pre-wrap',
-                    lineHeight: '1.5'
-                  }}
-                >
-                  {/* Placeholder for optimized Dockerfile */}
-                  <div style={{ color: '#88C0D0', fontStyle: 'italic', textAlign: 'center' }}>
-                    Optimized Dockerfile will appear here once analysis is complete...
-                  </div>
-                </div>
+              📋 Original Dockerfile
+            </div>
+            <DockerfileDisplay
+              dockerfileContents={dockerfileRawContents}
+              warningLineNumbers={warningLineNumbers}
+              lineToClauseMap={lineToClauseMap}
+              clauses={clauses}
+              activeClauseIndex={activeClauseIndex}
+              onLineClick={handleLineClick}
+              showHeader={false}
+            />
+          </div>
+          
+          {/* Recommendations Section */}
+          {warningLineNumbers.length > 0 && (
+            <div style={{ marginBottom: '2rem' }}>
+              <ClauseCard
+                clause={clauses[activeClauseIndex]}
+                isActive={true}
+                onNavigate={navigateClause}
+                currentIndex={activeClauseIndex}
+                totalCount={clauses.length}
+              />
+            </div>
+          )}
+
+          {/* Optimized Dockerfile Section */}
+          {dockerfileOptimizedContents && (
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{
+                textAlign: 'center',
+                fontSize: '1.1rem',
+                fontWeight: 'bold',
+                marginBottom: '1rem',
+                color: '#28a745'
+              }}>
+                🚀 Optimized Dockerfile
               </div>
+              <DockerfileDisplay
+                dockerfileContents={dockerfileOptimizedContents}
+                warningLineNumbers={[]}
+                lineToClauseMap={{}}
+                clauses={[]}
+                activeClauseIndex={0}
+                onLineClick={() => {}}
+                showHeader={false}
+              />
             </div>
           )}
         </div>
@@ -307,7 +238,6 @@ function App() {
 
     </div>
   </div>
-    </>
     );
 }
 
