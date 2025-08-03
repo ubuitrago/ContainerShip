@@ -1,8 +1,9 @@
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, Request
 from fastapi.responses import JSONResponse
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
-from process import DockerfileAnalysis
-from utils import logger
+from api.process import DockerfileAnalysis
+from api.utils import logger
 
 app = FastAPI()
 
@@ -24,6 +25,39 @@ app.add_middleware(
 def read_root():
     """Root endpoint that returns a welcome message."""
     return {"message": "Welcome to ContainerShip!"}
+
+@app.post("/analyze/")
+async def stream_dockerfile_analysis(request: Request):
+    """Stream analysis results in real-time."""
+    try:
+        # Get the raw JSON string from the request body
+        contents = await request.json()
+        
+        logger.info("Starting Dockerfile analysis streaming...")
+        # Log the contents for debugging
+        logger.info(f"Received Dockerfile contents: {contents[:100]}...")
+        
+        # Create the analysis object (not async)
+        analysis = DockerfileAnalysis(contents)
+        
+        # Create an async generator for streaming
+        async def generate_analysis():
+            async for chunk in analysis.annotate():
+                # Ensure each chunk is properly formatted for streaming
+                if chunk:
+                    yield chunk
+        
+        return StreamingResponse(
+            generate_analysis(), 
+            media_type="text/plain",
+            headers={"Cache-Control": "no-cache"}
+        )
+    except Exception as e:
+        logger.error(f"Error in streaming analysis: {e}")
+        # Return error as a stream
+        async def error_stream():
+            yield f"Error analyzing Dockerfile: {str(e)}"
+        return StreamingResponse(error_stream(), media_type="text/plain")
 
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
