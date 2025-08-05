@@ -1,11 +1,10 @@
-import ast
 import asyncio
 import pprint
 from fastmcp import Client
 from fastmcp.client.transports import StreamableHttpTransport
 
 # --- Configuration ---
-MCP_SERVER_URL = "http://localhost:8000/mcp"  # You may want to make this configurable via environment variables
+MCP_SERVER_URL = "http://localhost:8002/mcp"  # You may want to make this configurable via environment variables
 
 pp = pprint.PrettyPrinter(indent=2, width=100)
 

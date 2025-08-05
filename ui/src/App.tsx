@@ -15,6 +15,11 @@ function App() {
   const [lineToClauseMap, setLineToClauseMap] = useState<{ [lineNumber: number]: number }>({});
   const [activeClauseIndex, setActiveClauseIndex] = useState<number>(0);
 
+  // New state for clause-specific recommendations
+  const [clauseRecommendations, setClauseRecommendations] = useState<Map<number, string>>(new Map());
+  const [streamingClauseIndex, setStreamingClauseIndex] = useState<number>(-1);
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState<boolean>(false);
+
   const handleLineClick = (lineNumber: number) => {
     if (warningLineNumbers.includes(lineNumber)) {
       const clauseIndex = lineToClauseMap[lineNumber];
@@ -24,6 +29,11 @@ function App() {
       const recommendationsSection = document.getElementById('recommendations-section');
       if (recommendationsSection) {
         recommendationsSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      
+      // Log analysis status for debugging
+      if (!clauseRecommendations.has(clauseIndex)) {
+        console.log(`Loading analysis for clause ${clauseIndex}...`);
       }
     }
   };
@@ -36,6 +46,52 @@ function App() {
     } else {
       setActiveClauseIndex((prev) => prev === clauses.length - 1 ? 0 : prev + 1);
     }
+  };
+
+  // Stream analysis for each clause individually
+  const streamClauseRecommendations = async () => {
+    if (clauses.length === 0) return;
+    
+    setClauseRecommendations(new Map());
+    setIsAnalysisComplete(false);
+    
+    for (let i = 0; i < clauses.length; i++) {
+      const clause = clauses[i];
+      setStreamingClauseIndex(i);
+      
+      try {
+        const response = await fetch('http://localhost:8000/analyze/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(clause.content),
+        });
+
+        if (!response.ok) throw new Error('Analysis failed');
+        
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let analysisText = '';
+        
+        if (reader) {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value, { stream: true });
+            analysisText += chunk;
+            
+            // Update the recommendations for this specific clause
+            setClauseRecommendations(prev => new Map(prev.set(i, analysisText)));
+          }
+        }
+      } catch (error) {
+        console.error(`Error analyzing clause ${i}:`, error);
+        setClauseRecommendations(prev => new Map(prev.set(i, 'Error analyzing this clause.')));
+      }
+    }
+    
+    setStreamingClauseIndex(-1);
+    setIsAnalysisComplete(true);
   };
 
   const uploadFile = async (file: File) => {
@@ -92,7 +148,7 @@ function App() {
     if (clauses.length > 0) {
       console.log("Clauses loaded:", clauses);
       // Start streaming analysis automatically when clauses are loaded
-      // streamFullAnalysis(); // TODO: Implement this function
+      streamClauseRecommendations();
     }
   }, [clauses]);
 
@@ -206,6 +262,8 @@ function App() {
                 onNavigate={navigateClause}
                 currentIndex={activeClauseIndex}
                 totalCount={clauses.length}
+                isStreaming={streamingClauseIndex === activeClauseIndex}
+                streamingRecommendation={clauseRecommendations.get(activeClauseIndex) || ''}
               />
             </div>
           )}

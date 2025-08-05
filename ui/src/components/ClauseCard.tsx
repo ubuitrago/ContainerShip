@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import type { DockerfileClause } from '../types';
 
 interface ClauseCardProps {
@@ -7,6 +8,8 @@ interface ClauseCardProps {
   onNavigate: (direction: 'prev' | 'next') => void;
   currentIndex: number;
   totalCount: number;
+  isStreaming?: boolean;
+  streamingRecommendation?: string;
 }
 
 const ClauseCard: React.FC<ClauseCardProps> = ({
@@ -15,14 +18,50 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
   onNavigate,
   currentIndex,
   totalCount,
+  isStreaming = false,
+  streamingRecommendation = '',
 }) => {
   if (!isActive) return null;
 
   const isMultiLine = clause.line_numbers.length > 1;
-
-  return (
-    <div style={{ width: '100%' }}>
-      <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>Recommendations:</h2>
+  
+  // Determine what to display in recommendations
+  const getRecommendationContent = () => {
+    // If we're currently streaming for this clause, show the streaming content
+    if (isStreaming && streamingRecommendation) {
+      return (
+        <div>
+          <ReactMarkdown>{streamingRecommendation}</ReactMarkdown>
+          <span className="blinking-cursor">|</span>
+        </div>
+      );
+    }
+    
+    // If streaming finished and we have a streaming recommendation, show it
+    if (streamingRecommendation) {
+      return (
+        <div>
+          <ReactMarkdown>{streamingRecommendation}</ReactMarkdown>
+        </div>
+      );
+    }
+    
+    return <div className="text-gray-500">Analysis in progress...<span className="blinking-cursor">|</span></div>;
+  };  return (
+    <>
+      <style>
+        {`
+          @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+          }
+          .blinking-cursor {
+            animation: blink 1s infinite;
+          }
+        `}
+      </style>
+      <div style={{ width: '100%' }}>
+        <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>Recommendations:</h2>
       
       {/* Horizontal Navigation Controls */}
       <div style={{
@@ -124,6 +163,7 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
               borderRadius: '4px',
               fontFamily: 'monospace',
               fontSize: '0.85rem',
+              color: '#212529',
               marginBottom: '0.75rem',
               whiteSpace: 'pre-line',
               border: '1px solid rgba(0,0,0,0.1)',
@@ -142,13 +182,14 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
             }}>
               <strong>💡 Recommendation:</strong><br />
               <span style={{ marginTop: '0.5rem', display: 'block' }}>
-                {clause.recommendations}
+                {getRecommendationContent()}
               </span>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

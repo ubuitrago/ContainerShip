@@ -9,7 +9,7 @@ class DockerfileLine:
 
     def __repr__(self):
         return f"DockerfileLine(line_number={self.line_number}, content='{self.content}')"
-    
+
 
 class DockerfileClause:
     def __init__(self, lines: list[DockerfileLine]):
@@ -28,7 +28,6 @@ class DockerfileClause:
             "recommendations": self.recommendations,
             "content": self.content
         }
-    
 
 class DockerfileAnalysis:
     def __init__(self, raw_file_contents: str):
@@ -58,10 +57,14 @@ class DockerfileAnalysis:
         }
 
     async def annotate(self):
-        """Annotate the clauses with recommendations."""
+        """Annotate the first clause with recommendations."""
         client = await create_client()
         async with client:
-            for clause in self.clauses:
-                question = f"Provide recommendations for improving the following Dockerfile clause:\n{clause.content}"
-                clause.recommendations = await ask_docker_docs(client, question)
-                yield clause.recommendations
+            print("DEBUG: MCP Client created, starting annotation...")
+            if self.raw_file_contents:
+                clause = self.raw_file_contents
+                question = f"Provide recommendations for improving the following Dockerfile clause:\n{clause}. Be concise and actionable. The response format should be in Markdown syntax."
+                print(f"DEBUG: Sending question to MCP: {question[:100]}...")
+                self.recommendations = await ask_docker_docs(client, question)
+                print(f"DEBUG: Received recommendations: {self.recommendations[:100]}...")
+                yield self.recommendations
