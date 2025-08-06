@@ -1,0 +1,80 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+# Core FastAPI dependencies (from api/Pipfile)
+fastapi = "*"
+uvicorn = "*"
+click = "*"
+python-multipart = "*"
+starlette = "*"
+
+# Docker utilities
+docker = "*"
+
+# AI/ML and LangChain dependencies
+gradio = {extras = ["mcp"], version = "*"}
+langchain-chroma = ">=0.1.2"
+langchain-openai = "*"
+langchain-text-splitters = "*"
+langchain-community = "*"
+langchain-core = "*"
+openai = "*"
+chromadb = ">=0.4.1"
+
+# Text processing
+textblob = "*"
+tiktoken = "*"
+unstructured = {extras = ["md"], version = "*"}
+
+# Data science
+numpy = "<2.0"
+pandas = "*"
+
+# Utilities
+python-dotenv = "*"
+requests = "*"
+beautifulsoup4 = "*"
+aiohttp = "*"
+
+# MCP (Model Context Protocol)
+mcp = {extras = ["cli"], version = "*"}
+fastmcp = "*"
+
+# Web search capabilities
+duckduckgo-search = "*"
+tavily-python = "*"
+
+[dev-packages]
+# Development tools
+pytest = "*"
+pytest-asyncio = "*"
+black = "*"
+flake8 = "*"
+mypy = "*"
+pre-commit = "*"
+
+[requires]
+python_version = "3.13"
+
+[scripts]
+# API commands
+api = "uvicorn api.main:app --reload --host 0.0.0.0 --port 8000"
+api-prod = "uvicorn api.main:app --host 0.0.0.0 --port 8000"
+
+# MCP server commands  
+mcp-server = "python model/mcp-server/server.py"
+mcp-test = "python model/mcp-server/test_web_search.py"
+mcp-inspector = "fastmcp dev model/mcp-server/server.py"
+
+# RAG system commands
+rag-init = "python model/mcp-server/rag_doc_chain.py"
+
+# Development utilities
+format = "black ."
+lint = "flake8 ."
+type-check = "mypy ."
+test = "pytest"
+test-setup = "python test_unified_setup.py"
