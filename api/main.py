@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Request, HTTPException
+from fastapi import FastAPI, File, UploadFile, Request, HTTPException, Form
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -59,44 +59,76 @@ def read_root():
     return {"message": "Welcome to ContainerShip!"}
 
 @app.post("/analyze/")
-async def analyze_dockerfile(request: DockerfileAnalysisRequest):
+async def analyze_dockerfile(request: Request):
     """
-    Analyze a Dockerfile and provide clause-by-clause recommendations with optimized version.
+    Unified endpoint for Dockerfile analysis - automatically detects JSON or file upload.
+    
+    Usage:
+    1. JSON: POST {"content": "dockerfile_content"}  
+    2. File: POST with multipart/form-data file upload (field name: "file")
     
     Returns:
     - original_dockerfile: The original Dockerfile content
-    - clauses: List of analyzed clauses with recommendations
+    - clauses: List of analyzed clauses with recommendations  
     - optimized_dockerfile: An optimized version incorporating recommendations
     """
     try:
-        analysis = DockerfileAnalysis(request.content)
+        dockerfile_content = None
+        content_type = request.headers.get("content-type", "")
+        
+        if content_type.startswith("application/json"):
+            # JSON method
+            body = await request.json()
+            if "content" not in body:
+                raise HTTPException(status_code=400, detail="JSON body must contain 'content' field")
+            dockerfile_content = body["content"]
+            logger.info(f"Received JSON content, length: {len(dockerfile_content)} chars")
+            
+        elif content_type.startswith("multipart/form-data"):
+            # File upload method
+            form = await request.form()
+            if "file" not in form:
+                raise HTTPException(status_code=400, detail="Multipart form must contain 'file' field")
+            
+            file = form["file"]
+            dockerfile_content_bytes = await file.read()
+            dockerfile_content = dockerfile_content_bytes.decode('utf-8')
+            logger.info(f"Received file: {file.filename}, size: {len(dockerfile_content_bytes)} bytes")
+            
+        else:
+            raise HTTPException(
+                status_code=400, 
+                detail="Content-Type must be either 'application/json' or 'multipart/form-data'"
+            )
+        
+        # Process the Dockerfile
+        analysis = DockerfileAnalysis(dockerfile_content)
         await analysis.process(client)
         
         return analysis.as_dict()
     
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
     except Exception as e:
         logger.error(f"Error analyzing Dockerfile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing Dockerfile: {str(e)}")
 
 
-@app.post("/stream-analysis/")
+# Optional: Keep streaming analysis as a separate endpoint for real-time feedback
+@app.post("/analyze/stream/")
 async def stream_dockerfile_analysis(request: DockerfileAnalysisRequest):
-    """Stream analysis results in real-time."""
+    """Stream analysis results in real-time for progressive feedback."""
     try:
-        # Get the raw JSON string from the request body
-        contents = await request.json()
-        
         logger.info("Starting Dockerfile analysis streaming...")
-        # Log the contents for debugging
-        logger.info(f"Received Dockerfile contents: {contents[:100]}...")
+        logger.info(f"Received Dockerfile contents: {request.content[:100]}...")
         
-        # Create the analysis object (not async)
-        analysis = DockerfileAnalysis(contents)
+        # Create the analysis object
+        analysis = DockerfileAnalysis(request.content)
         
         # Create an async generator for streaming
         async def generate_analysis():
             async for chunk in analysis.annotate():
-                # Ensure each chunk is properly formatted for streaming
                 if chunk:
                     yield chunk
         
@@ -107,34 +139,12 @@ async def stream_dockerfile_analysis(request: DockerfileAnalysisRequest):
         )
     except Exception as e:
         logger.error(f"Error in streaming analysis: {e}")
-        # Return error as a stream
         async def error_stream():
             yield f"Error analyzing Dockerfile: {str(e)}"
         return StreamingResponse(error_stream(), media_type="text/plain")
 
-@app.post("/upload/")
-async def upload_file(file: UploadFile = File(...)):
-    """
-    Endpoint to upload a Dockerfile and process its contents.
-    Returns the same format as /analyze/ endpoint.
-    """
-    try:
-        dockerfile_contents_bytes = await file.read()
-        dockerfile_contents_as_string = dockerfile_contents_bytes.decode('utf-8')
 
-        logger.info(f"Received file: {file.filename}, size: {len(dockerfile_contents_bytes)} bytes")
-        
-        analysis = DockerfileAnalysis(dockerfile_contents_as_string)
-        await analysis.process(client)
-        
-        return analysis.as_dict()
-        
-    except Exception as e:
-        logger.error(f"Error processing uploaded file: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
-
-
-# Enhanced MCP-powered endpoints
+# Additional models for legacy endpoints
 class DockerfileRequest(BaseModel):
     content: str
     technology: str = ""
@@ -145,9 +155,13 @@ class WebSearchRequest(BaseModel):
     max_results: int = 5
 
 
+# Legacy endpoints - deprecated but kept for backward compatibility
 @app.post("/analyze/comprehensive/")
 async def comprehensive_dockerfile_analysis(request: DockerfileRequest):
-    """Get comprehensive Dockerfile analysis using all MCP tools."""
+    """
+    DEPRECATED: Use /analyze/ instead.
+    Get comprehensive Dockerfile analysis using all MCP tools.
+    """
     try:
         analysis = DockerfileAnalysis(request.content)
         result = await analysis.get_comprehensive_analysis()

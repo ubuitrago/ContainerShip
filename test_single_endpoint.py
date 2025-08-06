@@ -38,7 +38,7 @@ CMD ["npm", "start"]
         response = requests.post(
             "http://localhost:8000/analyze/",
             json={"content": dockerfile_content},
-            timeout=30
+            timeout=300
         )
         
         print(f"Status Code: {response.status_code}")
