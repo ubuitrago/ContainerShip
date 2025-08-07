@@ -10,7 +10,8 @@ from api.mcp_client import (
     optimize_dockerfile, 
     check_security_best_practices,
     search_dockerfile_examples,
-    create_client
+    create_client,
+    ask_docker_docs
 )
 
 
@@ -61,7 +62,7 @@ def read_root():
 @app.post("/analyze/")
 async def analyze_dockerfile(file: UploadFile = File(...)):
     """
-    Analyze a Dockerfile via file upload.
+    Analyze a Dockerfile via file upload (non-streaming version for compatibility).
     
     Returns:
     - original_dockerfile: The original Dockerfile content
@@ -79,6 +80,102 @@ async def analyze_dockerfile(file: UploadFile = File(...)):
         await analysis.process(client)
         
         return analysis.as_dict()
+    
+    except Exception as e:
+        logger.error(f"Error analyzing Dockerfile: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error analyzing Dockerfile: {str(e)}")
+
+
+@app.post("/analyze/stream/")
+async def analyze_dockerfile_stream(file: UploadFile = File(...)):
+    """
+    Analyze a Dockerfile via file upload with progressive streaming.
+    
+    Returns streaming JSON objects with:
+    - original_dockerfile: The original Dockerfile content (immediate)
+    - clauses: List of analyzed clauses with recommendations (progressive)
+    - optimized_dockerfile: An optimized version (final)
+    """
+    try:
+        # File upload method
+        dockerfile_content_bytes = await file.read()
+        dockerfile_content = dockerfile_content_bytes.decode('utf-8')
+        logger.info(f"Received file: {file.filename}, size: {len(dockerfile_content_bytes)} bytes")
+        
+        # Process the Dockerfile with streaming
+        analysis = DockerfileAnalysis(dockerfile_content)
+        
+        async def generate_analysis_stream():
+            import json
+            
+            # 1. Immediately return the original Dockerfile
+            yield f"data: {json.dumps({'type': 'original_dockerfile', 'data': dockerfile_content})}\n\n"
+            
+            # 2. Send clause structure immediately with placeholder recommendations
+            clause_structure = []
+            for i, clause in enumerate(analysis.clauses):
+                clause_dict = clause.as_dict()
+                clause_dict['recommendations'] = "⏳ Waiting for recommendation..."
+                clause_structure.append(clause_dict)
+            
+            yield f"data: {json.dumps({'type': 'clause_structure', 'data': clause_structure})}\n\n"
+            
+            # 3. Stream clause analysis as it happens
+            client = await create_client()
+            async with client:
+                # Analyze each clause progressively
+                for i, clause in enumerate(analysis.clauses):
+                    clause.technology = analysis.technology
+                    
+                    # Get recommendations for this clause
+                    try:
+                        doc_question = f"Best practices for this {analysis.technology} Dockerfile clause:\n{clause.content}"
+                        clause.recommendations = await ask_docker_docs(client, doc_question)
+                    except Exception as e:
+                        clause.recommendations = f"Could not get recommendations: {e}"
+                    
+                    # Stream this clause update
+                    clause_data = {
+                        'type': 'clause_update',
+                        'data': {
+                            'index': i,
+                            'clause': clause.as_dict(),
+                            'total_clauses': len(analysis.clauses)
+                        }
+                    }
+                    yield f"data: {json.dumps(clause_data)}\n\n"
+                
+                # 4. Generate and stream the optimized Dockerfile
+                try:
+                    await analysis._generate_optimized_dockerfile(client)
+                    optimized_data = {
+                        'type': 'optimized_dockerfile',
+                        'data': analysis.optimized_file_contents
+                    }
+                    yield f"data: {json.dumps(optimized_data)}\n\n"
+                except Exception as e:
+                    error_data = {
+                        'type': 'error',
+                        'data': f"Could not generate optimized Dockerfile: {e}"
+                    }
+                    yield f"data: {json.dumps(error_data)}\n\n"
+                
+                # 5. Final completion signal
+                completion_data = {
+                    'type': 'complete',
+                    'data': 'Analysis complete'
+                }
+                yield f"data: {json.dumps(completion_data)}\n\n"
+        
+        return StreamingResponse(
+            generate_analysis_stream(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "Access-Control-Allow-Origin": "*",
+            }
+        )
     
     except Exception as e:
         logger.error(f"Error analyzing Dockerfile: {str(e)}")

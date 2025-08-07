@@ -129,9 +129,11 @@ class DockerfileAnalysis:
             else: # This line does not start with a reserved instruction, it is part of the current clause
                 if len(dockerfile_lines_in_current_clause) == 0: # should never happen
                     raise Exception("Dockerfile clause must start with a reserved instruction")
-                
             # Add the line to the current list of lines for the clause
             dockerfile_lines_in_current_clause.append(DockerfileLine(i + 1, raw_line))
+        # append current clause contents one last time after loop closes provided there are lines in the final clause
+        if len(dockerfile_lines_in_current_clause) > 0:
+            self.clauses.append(DockerfileClause(dockerfile_lines_in_current_clause)) 
 
     async def process(self, client=None):
         """
@@ -224,7 +226,7 @@ class DockerfileAnalysis:
                     clause.technology = self.technology
                     
                     # Get comprehensive recommendations (combines RAG + web search)
-                    doc_question = f"Best practices for this {self.technology} Dockerfile clause:\n{clause.content}"
+                    doc_question = f"Provide recommendations based on best practices for this {self.technology} Dockerfile clause:\n{clause.content}. Be concise and actionable. The response format should be in Markdown syntax."
                     clause.recommendations = await ask_docker_docs(client, doc_question)
                 
                 # Generate optimized Dockerfile using AI

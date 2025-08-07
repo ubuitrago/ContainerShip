@@ -21,7 +21,7 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
 
   return (
     <div style={{ width: '100%' }}>
-      <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>Recommendations:</h2>
+      {/* <h2 style={{ textAlign: 'center', marginTop: 0, marginBottom: '1.5rem' }}>Recommendations:</h2> */}
       
       {/* Horizontal Navigation Controls */}
       <div style={{
@@ -135,7 +135,7 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
               borderRadius: '4px',
               border: '1px solid rgba(0,0,0,0.1)'
             }}>
-              <strong>💡 Recommendation:</strong>
+              <strong>💡 Recommendations:</strong>
               <div style={{ marginTop: '0.5rem' }}>
                 <ReactMarkdown
                   components={{
