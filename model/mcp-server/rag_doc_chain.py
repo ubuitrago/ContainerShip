@@ -8,6 +8,7 @@ from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
 from langchain_core.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from llm_provider import get_llm, get_fast_llm, get_quality_llm
 
 # Constants
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -92,7 +93,8 @@ else:
         collection_name="docker_docs",
     )
 
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
+# llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
+llm = get_llm()  # Use the configured LLM provider and model
 
 def answer_question(question: str, web_search_context: str = "") -> str:
     """
