@@ -59,13 +59,9 @@ def read_root():
     return {"message": "Welcome to ContainerShip!"}
 
 @app.post("/analyze/")
-async def analyze_dockerfile(request: Request):
+async def analyze_dockerfile(file: UploadFile = File(...)):
     """
-    Unified endpoint for Dockerfile analysis - automatically detects JSON or file upload.
-    
-    Usage:
-    1. JSON: POST {"content": "dockerfile_content"}  
-    2. File: POST with multipart/form-data file upload (field name: "file")
+    Analyze a Dockerfile via file upload.
     
     Returns:
     - original_dockerfile: The original Dockerfile content
@@ -73,33 +69,10 @@ async def analyze_dockerfile(request: Request):
     - optimized_dockerfile: An optimized version incorporating recommendations
     """
     try:
-        dockerfile_content = None
-        content_type = request.headers.get("content-type", "")
-        
-        if content_type.startswith("application/json"):
-            # JSON method
-            body = await request.json()
-            if "content" not in body:
-                raise HTTPException(status_code=400, detail="JSON body must contain 'content' field")
-            dockerfile_content = body["content"]
-            logger.info(f"Received JSON content, length: {len(dockerfile_content)} chars")
-            
-        elif content_type.startswith("multipart/form-data"):
-            # File upload method
-            form = await request.form()
-            if "file" not in form:
-                raise HTTPException(status_code=400, detail="Multipart form must contain 'file' field")
-            
-            file = form["file"]
-            dockerfile_content_bytes = await file.read()
-            dockerfile_content = dockerfile_content_bytes.decode('utf-8')
-            logger.info(f"Received file: {file.filename}, size: {len(dockerfile_content_bytes)} bytes")
-            
-        else:
-            raise HTTPException(
-                status_code=400, 
-                detail="Content-Type must be either 'application/json' or 'multipart/form-data'"
-            )
+        # File upload method
+        dockerfile_content_bytes = await file.read()
+        dockerfile_content = dockerfile_content_bytes.decode('utf-8')
+        logger.info(f"Received file: {file.filename}, size: {len(dockerfile_content_bytes)} bytes")
         
         # Process the Dockerfile
         analysis = DockerfileAnalysis(dockerfile_content)
@@ -107,9 +80,6 @@ async def analyze_dockerfile(request: Request):
         
         return analysis.as_dict()
     
-    except HTTPException:
-        # Re-raise HTTP exceptions
-        raise
     except Exception as e:
         logger.error(f"Error analyzing Dockerfile: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error analyzing Dockerfile: {str(e)}")

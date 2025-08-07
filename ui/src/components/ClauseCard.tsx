@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
 import type { DockerfileClause } from '../types';
 
 interface ClauseCardProps {
@@ -17,8 +18,6 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
   totalCount,
 }) => {
   if (!isActive) return null;
-
-  const isMultiLine = clause.line_numbers.length > 1;
 
   return (
     <div style={{ width: '100%' }}>
@@ -112,11 +111,7 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
               alignItems: 'center',
               gap: '0.5rem'
             }}>
-              {isMultiLine ? '📄' : '📝'} 
-              {isMultiLine 
-                ? `Lines ${clause.line_numbers[0]}-${clause.line_numbers[clause.line_numbers.length - 1]} (${clause.line_numbers.length} lines)`
-                : `Line ${clause.line_numbers[0]}`
-              }:
+               Line{clause.line_numbers.length === 1 ? "" : "s"} {clause.line_numbers.join(", ")}:
             </div>
             <div style={{ 
               backgroundColor: 'rgba(0,0,0,0.05)',
@@ -140,10 +135,45 @@ const ClauseCard: React.FC<ClauseCardProps> = ({
               borderRadius: '4px',
               border: '1px solid rgba(0,0,0,0.1)'
             }}>
-              <strong>💡 Recommendation:</strong><br />
-              <span style={{ marginTop: '0.5rem', display: 'block' }}>
-                {clause.recommendations}
-              </span>
+              <strong>💡 Recommendation:</strong>
+              <div style={{ marginTop: '0.5rem' }}>
+                <ReactMarkdown
+                  components={{
+                    // Custom styling for markdown elements
+                    p: ({children}) => <p style={{ margin: '0.5rem 0' }}>{children}</p>,
+                    code: ({children}) => (
+                      <code style={{
+                        backgroundColor: 'rgba(0,0,0,0.1)',
+                        padding: '0.2rem 0.4rem',
+                        borderRadius: '3px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.9em'
+                      }}>
+                        {children}
+                      </code>
+                    ),
+                    pre: ({children}) => (
+                      <pre style={{
+                        backgroundColor: 'rgba(0,0,0,0.05)',
+                        padding: '0.75rem',
+                        borderRadius: '4px',
+                        border: '1px solid rgba(0,0,0,0.1)',
+                        overflow: 'auto',
+                        fontSize: '0.85rem'
+                      }}>
+                        {children}
+                      </pre>
+                    ),
+                    ul: ({children}) => <ul style={{ paddingLeft: '1.5rem', margin: '0.5rem 0' }}>{children}</ul>,
+                    ol: ({children}) => <ol style={{ paddingLeft: '1.5rem', margin: '0.5rem 0' }}>{children}</ol>,
+                    li: ({children}) => <li style={{ margin: '0.25rem 0' }}>{children}</li>,
+                    strong: ({children}) => <strong style={{ fontWeight: 'bold', color: '#2c3e50' }}>{children}</strong>,
+                    em: ({children}) => <em style={{ fontStyle: 'italic', color: '#34495e' }}>{children}</em>
+                  }}
+                >
+                  {clause.recommendations}
+                </ReactMarkdown>
+              </div>
             </div>
           </div>
         </div>

@@ -19,12 +19,6 @@ function App() {
     if (warningLineNumbers.includes(lineNumber)) {
       const clauseIndex = lineToClauseMap[lineNumber];
       setActiveClauseIndex(clauseIndex);
-      
-      // Scroll to the recommendations section
-      const recommendationsSection = document.getElementById('recommendations-section');
-      if (recommendationsSection) {
-        recommendationsSection.scrollIntoView({ behavior: 'smooth' });
-      }
     }
   };
 
@@ -49,7 +43,7 @@ function App() {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/upload', {
+      const response = await fetch('http://localhost:8000/analyze/', {
         method: 'POST',
         body: formData,
       });
@@ -58,11 +52,11 @@ function App() {
       const data: DockerfileAnalysisResponse = await response.json();
 
       console.log("Response from backend:", data); 
-      setDockerfileRawContents(data.raw_file_contents); 
-      setDockerfileOptimizedContents(data.optimized_file_contents);
+      setDockerfileRawContents(data.original_dockerfile); 
+      setDockerfileOptimizedContents(data.optimized_dockerfile);
       setClauses(data.clauses);
       
-      // Extract line numbers and map them to their clause index
+      // Handle array of line numbers from the API
       const allWarningLines: number[] = [];
       const lineToClause: { [lineNumber: number]: number } = {};
       
@@ -114,6 +108,18 @@ function App() {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [clauses.length]);
 
+  const downloadOptimizedDockerfile = () => {
+    if (!dockerfileOptimizedContents) return;
+    
+    const element = document.createElement('a');
+    const file = new Blob([dockerfileOptimizedContents], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'Dockerfile.optimized';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
+
   return (
     <div
     style={{
@@ -160,7 +166,7 @@ function App() {
             cursor: 'pointer',
           }}
         >
-          Choose File
+          📁 Choose Dockerfile
         </label>
         <input
           id="file-upload"
@@ -171,7 +177,7 @@ function App() {
       </div>
 
       {/* ✅ Show Dockerfile Contents */}
-      {loading && <p>Uploading...</p>}
+      {loading && <p>Analyzing...</p>}
 
       {dockerfileRawContents && (
         <div style={{ width: '100%', maxWidth: '900px' }}>
@@ -217,10 +223,35 @@ function App() {
                 textAlign: 'center',
                 fontSize: '1.1rem',
                 fontWeight: 'bold',
+                color: '#28a745',
                 marginBottom: '1rem',
-                color: '#28a745'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
               }}>
                 🚀 Optimized Dockerfile
+                <span
+                  onClick={downloadOptimizedDockerfile}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    color: '#28a745',
+                    transition: 'color 0.2s, transform 0.2s',
+                    display: 'inline-block'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#218838';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#28a745';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                  title="Download optimized Dockerfile"
+                >
+                  📥
+                </span>
               </div>
               <DockerfileDisplay
                 dockerfileContents={dockerfileOptimizedContents}
