@@ -48,13 +48,16 @@ ContainerShip now combines local Docker documentation with real-time web search 
 ContainerShip now uses a **unified Pipfile** at the root level for all Python dependencies (API, MCP server, and ML models), making development and deployment much simpler.
 
 ### Quick Start
+First run the following.
 ```bash
-# Install all dependencies
 make install
+```
 
-# Or manually:
-npm install --prefix ui    # Frontend dependencies
-pipenv install            # All Python dependencies
+Then run the next two commands in separate terminals.
+
+```bash
+make dev-mcp
+make dev
 ```
 
 ### Development Environment
