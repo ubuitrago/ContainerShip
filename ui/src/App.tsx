@@ -1,6 +1,6 @@
 import logo from './assets/logo.svg';
 import { useState, useEffect } from 'react';
-import type { DockerfileClause, DockerfileAnalysisResponse } from './types';
+import type { DockerfileClause } from './types';
 import DockerfileDisplay from './components/DockerfileDisplay';
 import ClauseCard from './components/ClauseCard';
 
@@ -10,6 +10,17 @@ function App() {
   const [dockerfileOptimizedContents, setDockerfileOptimizedContents] = useState<string>('');
   const [clauses, setClauses] = useState<DockerfileClause[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [analysisProgress, setAnalysisProgress] = useState<{
+    originalLoaded: boolean;
+    clausesInProgress: number;
+    totalClauses: number;
+    optimizedLoaded: boolean;
+  }>({
+    originalLoaded: false,
+    clausesInProgress: 0,
+    totalClauses: 0,
+    optimizedLoaded: false
+  });
 
   const [warningLineNumbers, setWarningLineNumbers] = useState<number[]>([]);
   const [lineToClauseMap, setLineToClauseMap] = useState<{ [lineNumber: number]: number }>({});
@@ -19,12 +30,6 @@ function App() {
     if (warningLineNumbers.includes(lineNumber)) {
       const clauseIndex = lineToClauseMap[lineNumber];
       setActiveClauseIndex(clauseIndex);
-      
-      // Scroll to the recommendations section
-      const recommendationsSection = document.getElementById('recommendations-section');
-      if (recommendationsSection) {
-        recommendationsSection.scrollIntoView({ behavior: 'smooth' });
-      }
     }
   };
 
@@ -49,32 +54,119 @@ function App() {
 
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/upload', {
+      
+      // Reset state for new analysis
+      setDockerfileRawContents('');
+      setDockerfileOptimizedContents('');
+      setClauses([]);
+      setWarningLineNumbers([]);
+      setLineToClauseMap({});
+      setActiveClauseIndex(0);
+      setAnalysisProgress({
+        originalLoaded: false,
+        clausesInProgress: 0,
+        totalClauses: 0,
+        optimizedLoaded: false
+      });
+
+      const response = await fetch('http://localhost:8000/analyze/stream/', {
         method: 'POST',
         body: formData,
       });
 
       if (!response.ok) throw new Error('Upload failed');
-      const data: DockerfileAnalysisResponse = await response.json();
-
-      console.log("Response from backend:", data); 
-      setDockerfileRawContents(data.raw_file_contents); 
-      setDockerfileOptimizedContents(data.optimized_file_contents);
-      setClauses(data.clauses);
       
-      // Extract line numbers and map them to their clause index
-      const allWarningLines: number[] = [];
-      const lineToClause: { [lineNumber: number]: number } = {};
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
       
-      data.clauses.forEach((clause: DockerfileClause, clauseIndex: number) => {
-        clause.line_numbers.forEach((lineNum: number) => {
-          allWarningLines.push(lineNum);
-          lineToClause[lineNum] = clauseIndex;
-        });
-      });
-      
-      setWarningLineNumbers(allWarningLines);
-      setLineToClauseMap(lineToClause);
+      if (reader) {
+        let buffer = '';
+        const streamClauses: DockerfileClause[] = [];
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          
+          // Process complete lines, keep incomplete line in buffer
+          for (let i = 0; i < lines.length - 1; i++) {
+            const line = lines[i].trim();
+            if (line.startsWith('data: ')) {
+              try {
+                const jsonStr = line.substring(6); // Remove 'data: '
+                const message = JSON.parse(jsonStr);
+                
+                switch (message.type) {
+                  case 'original_dockerfile':
+                    console.log("Received original Dockerfile");
+                    setDockerfileRawContents(message.data);
+                    setAnalysisProgress(prev => ({ ...prev, originalLoaded: true }));
+                    break;
+                    
+                  case 'clause_structure':
+                    console.log("Received clause structure");
+                    // Initialize clauses with placeholder recommendations
+                    const initialClauses = message.data;
+                    setClauses(initialClauses);
+                    streamClauses.length = 0; // Clear and resize array
+                    streamClauses.push(...initialClauses);
+                    
+                    // Set up initial warning lines
+                    const allWarningLines: number[] = [];
+                    const lineToClause: { [lineNumber: number]: number } = {};
+                    
+                    initialClauses.forEach((clause: DockerfileClause, clauseIndex: number) => {
+                      clause.line_numbers.forEach((lineNum: number) => {
+                        allWarningLines.push(lineNum);
+                        lineToClause[lineNum] = clauseIndex;
+                      });
+                    });
+                    
+                    setWarningLineNumbers(allWarningLines);
+                    setLineToClauseMap(lineToClause);
+                    setAnalysisProgress(prev => ({ ...prev, totalClauses: initialClauses.length }));
+                    break;
+                    
+                  case 'clause_update':
+                    console.log(`Received clause ${message.data.index + 1}/${message.data.total_clauses}`);
+                    // Update specific clause with actual recommendations
+                    streamClauses[message.data.index] = message.data.clause;
+                    setClauses([...streamClauses]);
+                    
+                    // Update progress
+                    setAnalysisProgress(prev => ({
+                      ...prev,
+                      clausesInProgress: message.data.index + 1
+                    }));
+                    break;
+                    
+                  case 'optimized_dockerfile':
+                    console.log("Received optimized Dockerfile");
+                    setDockerfileOptimizedContents(message.data);
+                    setAnalysisProgress(prev => ({ ...prev, optimizedLoaded: true }));
+                    break;
+                    
+                  case 'error':
+                    console.error("Analysis error:", message.data);
+                    alert(`Analysis error: ${message.data}`);
+                    break;
+                    
+                  case 'complete':
+                    console.log("Analysis complete");
+                    break;
+                }
+              } catch (e) {
+                console.error('Error parsing SSE message:', e);
+              }
+            }
+          }
+          
+          // Keep the last incomplete line in buffer
+          buffer = lines[lines.length - 1];
+        }
+      }
     } catch (error) {
       console.error(error);
       alert('Something went wrong.');
@@ -113,6 +205,18 @@ function App() {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [clauses.length]);
+
+  const downloadOptimizedDockerfile = () => {
+    if (!dockerfileOptimizedContents) return;
+    
+    const element = document.createElement('a');
+    const file = new Blob([dockerfileOptimizedContents], { type: 'text/plain' });
+    element.href = URL.createObjectURL(file);
+    element.download = 'Dockerfile.optimized';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+  };
 
   return (
     <div
@@ -160,7 +264,7 @@ function App() {
             cursor: 'pointer',
           }}
         >
-          Choose File
+          📁 Choose Dockerfile
         </label>
         <input
           id="file-upload"
@@ -171,7 +275,39 @@ function App() {
       </div>
 
       {/* ✅ Show Dockerfile Contents */}
-      {loading && <p>Uploading...</p>}
+      {loading && (
+        <div style={{ 
+          textAlign: 'center', 
+          padding: '2rem',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '8px',
+          margin: '2rem 0'
+        }}>
+          <p style={{ fontSize: '1.1rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            🔍 Analyzing Dockerfile...
+          </p>
+          {analysisProgress.originalLoaded && (
+            <p style={{ color: '#28a745', margin: '0.5rem 0' }}>
+              ✅ Original Dockerfile loaded
+            </p>
+          )}
+          {analysisProgress.totalClauses > 0 && (
+            <>
+              <p style={{ color: '#28a745', margin: '0.5rem 0' }}>
+                ✅ Found {analysisProgress.totalClauses} clauses to analyze
+              </p>
+              <p style={{ color: '#17a2b8', margin: '0.5rem 0' }}>
+                📋 Generating recommendations: {analysisProgress.clausesInProgress}/{analysisProgress.totalClauses}
+              </p>
+            </>
+          )}
+          {analysisProgress.optimizedLoaded && (
+            <p style={{ color: '#28a745', margin: '0.5rem 0' }}>
+              🚀 Optimized Dockerfile generated
+            </p>
+          )}
+        </div>
+      )}
 
       {dockerfileRawContents && (
         <div style={{ width: '100%', maxWidth: '900px' }}>
@@ -217,10 +353,35 @@ function App() {
                 textAlign: 'center',
                 fontSize: '1.1rem',
                 fontWeight: 'bold',
+                color: '#28a745',
                 marginBottom: '1rem',
-                color: '#28a745'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
               }}>
                 🚀 Optimized Dockerfile
+                <span
+                  onClick={downloadOptimizedDockerfile}
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '1rem',
+                    color: '#28a745',
+                    transition: 'color 0.2s, transform 0.2s',
+                    display: 'inline-block'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = '#218838';
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = '#28a745';
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }}
+                  title="Download optimized Dockerfile"
+                >
+                  📥
+                </span>
               </div>
               <DockerfileDisplay
                 dockerfileContents={dockerfileOptimizedContents}

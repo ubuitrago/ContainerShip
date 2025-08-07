@@ -2,6 +2,8 @@ import React from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { nord } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import type { DockerfileClause } from '../types';
+import { githubGist } from 'react-syntax-highlighter/dist/esm/styles/hljs';
+import { googlecode } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 interface DockerfileDisplayProps {
   dockerfileContents: string;
@@ -89,7 +91,7 @@ const DockerfileDisplay: React.FC<DockerfileDisplayProps> = ({
           }
           return {};
         }}
-        style={nord}
+        style={googlecode}
         customStyle={{
           borderRadius: '8px',
           padding: '1rem',

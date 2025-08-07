@@ -1,3 +1,7 @@
+# This requirements.txt is auto-generated from Pipfile for deployment compatibility
+# For development, use: pipenv install
+# To update this file, run: pipenv requirements > requirements.txt
+
 docker
 gradio[mcp]
 textblob
@@ -13,6 +17,15 @@ unstructured[md]
 numpy<2.0
 pandas
 python-dotenv
-mcp
 mcp[cli]
 fastmcp
+duckduckgo-search
+tavily-python
+requests
+beautifulsoup4
+aiohttp
+fastapi
+uvicorn
+click
+python-multipart
+starlette
