@@ -106,6 +106,62 @@ async def search_security_vulnerabilities(client: Client, base_image: str = "", 
         return error_msg
 
 
+def clean_dockerfile_output(dockerfile_content: str) -> str:
+    """Clean up LLM output to ensure valid Dockerfile syntax."""
+    import re
+    
+    lines = dockerfile_content.strip().split('\n')
+    cleaned_lines = []
+    
+    # Valid Docker instructions
+    valid_instructions = {
+        'FROM', 'RUN', 'CMD', 'LABEL', 'MAINTAINER', 'EXPOSE', 'ENV', 
+        'ADD', 'COPY', 'ENTRYPOINT', 'VOLUME', 'USER', 'WORKDIR', 
+        'ARG', 'ONBUILD', 'STOPSIGNAL', 'HEALTHCHECK', 'SHELL'
+    }
+    
+    for line in lines:
+        line = line.strip()
+        
+        # Skip empty lines
+        if not line:
+            cleaned_lines.append('')
+            continue
+            
+        # Keep Docker comments
+        if line.startswith('#'):
+            cleaned_lines.append(line)
+            continue
+            
+        # Remove markdown code blocks
+        if line.startswith('```') or line.endswith('```'):
+            continue
+            
+        # Remove markdown formatting
+        line = re.sub(r'`([^`]+)`', r'\1', line)  # Remove backticks
+        line = re.sub(r'\*\*(.*?)\*\*', r'\1', line)  # Remove bold markdown
+        line = re.sub(r'\*(.*?)\*', r'\1', line)  # Remove italic markdown
+        
+        # Check if line starts with valid Docker instruction
+        first_word = line.split()[0].upper() if line.split() else ''
+        
+        if first_word in valid_instructions:
+            cleaned_lines.append(line)
+        elif line and not line.startswith('#'):
+            # If it's not a valid instruction and not a comment, skip it
+            # This removes explanatory text that might break Docker
+            continue
+    
+    # Join lines and ensure it starts with FROM
+    result = '\n'.join(cleaned_lines).strip()
+    
+    # If no FROM instruction found, this might not be a valid Dockerfile
+    if not re.search(r'^FROM\s+', result, re.MULTILINE | re.IGNORECASE):
+        return f"# Error: Generated content does not appear to be a valid Dockerfile\n{result}"
+    
+    return result
+
+
 async def generate_optimized_dockerfile(client: Client, dockerfile_content: str, technology_stack: str = "") -> str:
     """Generate an optimized Dockerfile using the MCP optimize_dockerfile tool and extract just the Dockerfile content."""
     try:
@@ -114,7 +170,7 @@ async def generate_optimized_dockerfile(client: Client, dockerfile_content: str,
         
         # Use ask_docker_docs to generate a clean Dockerfile
         dockerfile_prompt = f"""
-Please generate an optimized Dockerfile based on these recommendations for a {technology_stack} application.
+Generate a clean, optimized Dockerfile for a {technology_stack} application based on the recommendations below.
 
 Original Dockerfile:
 {dockerfile_content}
@@ -122,11 +178,23 @@ Original Dockerfile:
 Optimization recommendations:
 {optimization_response[:500]}...
 
-Please provide ONLY the optimized Dockerfile content with proper Docker syntax (no explanations, no markdown):
+CRITICAL REQUIREMENTS:
+- Output ONLY valid Dockerfile instructions
+- NO markdown formatting (no backticks, no ```dockerfile blocks)
+- NO explanatory text or comments outside of Docker # comments
+- NO extra text before or after the Dockerfile content
+- Start directly with FROM instruction
+- Use only valid Docker instruction syntax (FROM, RUN, COPY, etc.)
+- Each line must be a valid Docker instruction or comment starting with #
+
+Return the optimized Dockerfile content ready to be saved as a file:
 """
         
         optimized_dockerfile = await ask_docker_docs(client, dockerfile_prompt)
-        return optimized_dockerfile
+        
+        # Clean up the response to ensure it's valid Docker syntax
+        cleaned_dockerfile = clean_dockerfile_output(optimized_dockerfile)
+        return cleaned_dockerfile
         
     except Exception as e:
         error_msg = f"Error generating optimized Dockerfile: {e}"
