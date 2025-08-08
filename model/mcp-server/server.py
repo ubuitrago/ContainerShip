@@ -170,6 +170,38 @@ def search_dockerfile_examples(technology: str, use_case: str = "") -> str:
     return formatted_results
 
 @mcp.tool()
+def search_security_vulnerabilities_tool(base_image: str = "", packages: str = "") -> str:
+    """
+    Search for specific CVEs and security vulnerabilities for Docker images and packages.
+    
+    Args:
+        base_image (str): The base Docker image to check for vulnerabilities (e.g., "python:3.9", "node:16").
+        packages (str): Comma-separated list of packages to check for security issues.
+    
+    Returns:
+        str: Detailed CVE analysis and security vulnerability report with specific findings.
+    """
+    # Convert packages string to list
+    package_list = [pkg.strip() for pkg in packages.split(",") if pkg.strip()] if packages else []
+    
+    # Get targeted security vulnerability analysis
+    vulnerability_report = search_security_vulnerabilities(base_image, package_list)
+    
+    # Add structured summary at the top
+    summary_header = f"""# 🔒 Security Vulnerability Report
+
+**Target Analysis:**
+- **Base Image**: {base_image if base_image else 'Not specified'}
+- **Packages Analyzed**: {', '.join(package_list) if package_list else 'None specified'}
+- **Analysis Date**: {__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+---
+
+"""
+    
+    return summary_header + vulnerability_report
+
+@mcp.tool()
 def check_security_best_practices(dockerfile_content: str) -> str:
     """
     Check Dockerfile against current security best practices using both local knowledge and web research.

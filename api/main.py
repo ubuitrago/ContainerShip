@@ -10,6 +10,7 @@ from api.mcp_client import (
     optimize_dockerfile, 
     check_security_best_practices,
     search_dockerfile_examples,
+    search_security_vulnerabilities,
     create_client,
     ask_docker_docs
 )
@@ -217,6 +218,11 @@ class DockerfileRequest(BaseModel):
     technology: str = ""
 
 
+class VulnerabilitySearchRequest(BaseModel):
+    base_image: str = ""
+    packages: str = ""
+
+
 class WebSearchRequest(BaseModel):
     query: str
     max_results: int = 5
@@ -284,6 +290,28 @@ async def security_analysis_endpoint(request: DockerfileRequest):
         logger.error(f"Error in security analysis: {e}")
         return JSONResponse(
             content={"error": f"Security analysis failed: {str(e)}"}, 
+            status_code=500
+        )
+
+
+@app.post("/security/vulnerabilities/")
+async def vulnerability_search_endpoint(request: VulnerabilitySearchRequest):
+    """Search for security vulnerabilities for specific base images and packages."""
+    try:
+        client = await create_client()
+        async with client:
+            result = await search_security_vulnerabilities(client, request.base_image, request.packages)
+            
+        logger.info("Vulnerability search completed")
+        return JSONResponse(
+            content={"vulnerability_report": result, "base_image": request.base_image, "packages": request.packages}, 
+            status_code=200
+        )
+        
+    except Exception as e:
+        logger.error(f"Error in vulnerability search: {e}")
+        return JSONResponse(
+            content={"error": f"Vulnerability search failed: {str(e)}"}, 
             status_code=500
         )
 

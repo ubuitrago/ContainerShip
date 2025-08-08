@@ -81,8 +81,7 @@ async def search_dockerfile_examples(client: Client, technology: str, use_case: 
 
 
 async def check_security_best_practices(client: Client, dockerfile_content: str, technology_stack: str = "") -> str:
-    """Call the check_security_best_practices tool to get security recommendations."""
-    # This tool only takes dockerfile_content parameter
+    """Call the check_security_best_practices tool for security analysis."""
     params = {"dockerfile_content": dockerfile_content}
     try:
         result = await client.call_tool("check_security_best_practices", params)
@@ -90,6 +89,19 @@ async def check_security_best_practices(client: Client, dockerfile_content: str,
         return unwrapped if isinstance(unwrapped, str) else str(unwrapped)
     except Exception as e:
         error_msg = f"Error calling check_security_best_practices tool: {e}"
+        print(error_msg)
+        return error_msg
+
+
+async def search_security_vulnerabilities(client: Client, base_image: str = "", packages: str = "") -> str:
+    """Call the search_security_vulnerabilities_tool for vulnerability analysis."""
+    params = {"base_image": base_image, "packages": packages}
+    try:
+        result = await client.call_tool("search_security_vulnerabilities_tool", params)
+        unwrapped = unwrap_tool_result(result)
+        return unwrapped if isinstance(unwrapped, str) else str(unwrapped)
+    except Exception as e:
+        error_msg = f"Error calling search_security_vulnerabilities_tool: {e}"
         print(error_msg)
         return error_msg
 

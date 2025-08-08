@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import type { DockerfileClause } from './types';
 import DockerfileDisplay from './components/DockerfileDisplay';
 import ClauseCard from './components/ClauseCard';
+import SecurityVulnerabilityDisplay from './components/SecurityVulnerabilityDisplay';
 
 
 function App() {
@@ -221,14 +222,24 @@ function App() {
   return (
     <div
     style={{
-      margin: 'auto',
-      maxWidth: dockerfileRawContents ? '900px' : '335px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      padding: '0 1rem',
+      background: 'linear-gradient(to right, #86fde8, #acb6e5)',
+      backgroundSize: '400% 400%',
+      backgroundAttachment: 'fixed',
+      animation: 'gradient 15s ease infinite',
+      minHeight: '100vh',
+      width: '100%',
       }}
     >
+      <div
+      style={{
+        margin: 'auto',
+        maxWidth: dockerfileRawContents ? '900px' : '335px',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem 1rem',
+        }}
+      >
     {/* Logo at the center top */}
     <img
       src={logo}
@@ -333,6 +344,11 @@ function App() {
             />
           </div>
           
+          {/* Security Vulnerability Check Section */}
+          <SecurityVulnerabilityDisplay
+            dockerfileContent={dockerfileRawContents}
+          />
+          
           {/* Recommendations Section */}
           {warningLineNumbers.length > 0 && (
             <div style={{ marginBottom: '2rem' }}>
@@ -397,6 +413,7 @@ function App() {
         </div>
       )}
 
+    </div>
     </div>
   </div>
     );
