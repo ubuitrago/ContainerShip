@@ -94,7 +94,7 @@ else:
     )
 
 # llm = ChatOpenAI(model="gpt-4o-mini", temperature=0.2)
-llm = get_llm()  # Use the configured LLM provider and model
+llm = get_llm(provider="gemini")  # Use the configured LLM provider and model
 
 def answer_question(question: str, web_search_context: str = "") -> str:
     """

@@ -30,8 +30,8 @@ aiohttp = "*"
 mcp = {extras = ["cli"], version = "*"}
 fastmcp = "*"
 duckduckgo-search = "*"
-tavily-python = "*"
 langchain-google-genai = "*"
+tavily-python = "*"
 
 [dev-packages]
 pytest = "*"
