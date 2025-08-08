@@ -94,14 +94,15 @@ Speaker Notes: Let's start by understanding the problem we're solving. Currently
 
 ### ContainerShip Solution Overview
 
-• **AI-powered optimization** with specialized containerization expertise
-• **Hybrid knowledge system**: Local docs + Real-time web intelligence
+• **Multi-LLM AI optimization** with support for OpenAI GPT & Google Gemini
+• **Enhanced hybrid knowledge**: Local docs + DuckDuckGo + Tavily intelligence
+• **Integrated vulnerability scanning** for Docker images and packages
 • **Technology-aware analysis** tailored to your specific stack
-• **Interactive web interface** with real-time analysis
+• **Interactive web interface** with real-time analysis & security assessment
 • **Extensible MCP architecture** for continuous improvement
 
 <!-- 
-Speaker Notes: ContainerShip addresses these limitations through an AI-powered approach that combines the best of both worlds. We use specialized containerization expertise through Large Language Models, but unlike generic AI tools, our system has deep Docker knowledge. Our hybrid architecture combines comprehensive local documentation with real-time web intelligence, ensuring recommendations are both foundationally sound and current. The platform provides technology-aware analysis - it understands whether you're working with Python Flask, Node.js React, or Java Spring applications and tailors recommendations accordingly. All of this is delivered through an intuitive web interface that provides real-time analysis and feedback.
+Speaker Notes: ContainerShip addresses these limitations through a multi-faceted AI-powered approach that combines the best of both worlds. We now support multiple LLM providers - both OpenAI GPT and Google Gemini models - allowing users to optimize for cost, performance, or availability. Our enhanced hybrid architecture combines comprehensive local documentation with real-time web intelligence through both DuckDuckGo and Tavily APIs, ensuring recommendations are foundationally sound, current, and security-focused. The platform provides technology-aware analysis that understands your specific stack and includes integrated vulnerability scanning for Docker images and packages. All of this is delivered through an intuitive web interface that provides real-time analysis, security assessment, and feedback.
 -->
 
 ---
@@ -111,7 +112,7 @@ Speaker Notes: ContainerShip addresses these limitations through an AI-powered a
 ![ContainerShip Architecture](./architecture-diagram.png)
 
 <!-- 
-Speaker Notes: Let me walk you through our three-tier architecture. The frontend is a React TypeScript single-page application featuring an advanced Dockerfile editor with syntax highlighting and real-time analysis capabilities. The FastAPI backend serves as our orchestration layer and importantly houses our MCP client, which manages all communication with our AI engine. The AI engine is built as an MCP server that coordinates multiple specialized tools for different aspects of Docker optimization. Our knowledge system draws from two sources: ChromaDB provides comprehensive local Docker documentation through a RAG system, while DuckDuckGo integration ensures we have access to current security updates and best practices. All of this intelligence is processed through GPT-4o-mini, which we've optimized for containerization analysis through sophisticated prompt engineering.
+Speaker Notes: Let me walk you through our three-tier architecture with the latest enhancements. The frontend is a React TypeScript single-page application featuring an advanced Dockerfile editor with syntax highlighting, real-time analysis capabilities, and dedicated vulnerability scanning interface. The FastAPI backend serves as our orchestration layer and houses our MCP client, which manages all communication with our AI engine and coordinates multi-LLM support. The AI engine is built as an MCP server that coordinates multiple specialized tools for different aspects of Docker optimization. Our enhanced knowledge system draws from three sources: ChromaDB provides comprehensive local Docker documentation through a RAG system, DuckDuckGo offers privacy-focused web search, and Tavily delivers premium security intelligence. All of this intelligence is processed through either GPT-4o-mini or Google Gemini models, which we've optimized for containerization analysis through sophisticated prompt engineering.
 -->
 
 ---
@@ -121,18 +122,22 @@ Speaker Notes: Let me walk you through our three-tier architecture. The frontend
 #### **Frontend**: React TypeScript SPA
 • Real-time Dockerfile editor with syntax highlighting
 • Interactive analysis visualization
+• **Integrated vulnerability scanner** for Docker images
 
 #### **Backend**: FastAPI Server  
+• **Multi-LLM support** (OpenAI GPT & Google Gemini)
 • Integrated MCP client for AI communication
 • Technology detection and processing pipeline
 
 #### **AI Engine**: MCP Server
 • Specialized Docker optimization tools
+• **Enhanced web search** with Tavily integration
 • Hybrid knowledge system coordination
 
 #### **Knowledge Sources**
 • **ChromaDB**: Local Docker documentation (RAG)
-• **DuckDuckGo**: Real-time web intelligence
+• **DuckDuckGo**: Privacy-focused web intelligence
+• **Tavily API**: Premium security & threat intelligence
 
 ---
 
@@ -142,19 +147,22 @@ Speaker Notes: Let me walk you through our three-tier architecture. The frontend
 RAG system with comprehensive Docker documentation
 
 #### **web_search_docker** 
-Real-time intelligence gathering
+**Multi-provider** intelligence: DuckDuckGo + Tavily APIs
 
 #### **optimize_dockerfile**
 Multi-layered analysis engine
 
 #### **check_security_best_practices**
-Current vulnerability assessment  
+**Enhanced vulnerability assessment** with current threat intelligence
 
 #### **search_dockerfile_examples**
 Community-validated patterns
 
+#### **search_security_vulnerabilities** *(NEW)*
+**Dedicated CVE & image vulnerability scanning**
+
 <!-- 
-Speaker Notes: The heart of our innovation lies in our Model Context Protocol integration. We've developed five specialized MCP tools that work together seamlessly. The docker_docs tool serves as our knowledge foundation, implementing a sophisticated RAG system built on extensive Docker documentation with ChromaDB and OpenAI embeddings. Our web_search_docker tool complements this with real-time intelligence, performing optimized searches for current security vulnerabilities and emerging best practices. The optimize_dockerfile tool orchestrates comprehensive analysis combining local knowledge with current web research. We also have specialized tools for security assessment and finding community-validated containerization patterns. This modular approach means we can easily add new capabilities without disrupting existing functionality.
+Speaker Notes: The heart of our innovation lies in our enhanced Model Context Protocol integration. We've developed six specialized MCP tools that work together seamlessly. The docker_docs tool serves as our knowledge foundation with comprehensive Docker documentation. Our web_search_docker tool now features multi-provider capabilities, combining DuckDuckGo's privacy-focused search with Tavily's premium security intelligence. The optimize_dockerfile tool orchestrates comprehensive analysis, while we have specialized tools for security assessment and community patterns. Our latest addition is the search_security_vulnerabilities tool, which provides dedicated CVE scanning and image vulnerability assessment. This modular approach means we can easily add new capabilities without disrupting existing functionality.
 -->
 
 ---
@@ -167,40 +175,46 @@ Drag-and-drop interface with instant validation
 #### **Analysis** 
 Automatic technology stack detection
 
+#### **Vulnerability Scanning** *(NEW)*
+**Automated image & package security assessment**
+
 #### **Processing**
-Concurrent analysis across multiple dimensions
+Concurrent analysis across multiple dimensions with **multi-LLM support**
 
 #### **Results**
-Side-by-side comparison with color-coded recommendations
+Side-by-side comparison with **vulnerability reports** & color-coded recommendations
 
 #### **Interactive**
-Navigable recommendation cards with detailed explanations
+Navigable recommendation cards with detailed explanations & **security insights**
 
 <!-- 
-Speaker Notes: The user experience is designed to be both intuitive and comprehensive. Users start with a simple drag-and-drop interface that provides instant feedback and validation. Once uploaded, our system automatically detects the underlying technology stack - whether it's Python Flask, Node.js, Java Spring, or any other framework. The analysis process runs concurrently across multiple dimensions: security vulnerabilities, performance optimization, and best practices adherence. Results are presented in an interactive side-by-side comparison showing the original Dockerfile alongside our optimized version. Color-coded highlighting draws attention to problematic areas, while navigable recommendation cards provide detailed explanations for each suggestion. This approach transforms complex technical analysis into actionable, understandable guidance.
+Speaker Notes: The user experience is designed to be both intuitive and comprehensive. Users start with a simple drag-and-drop interface that provides instant feedback and validation. Once uploaded, our system automatically detects the underlying technology stack and performs integrated vulnerability scanning of referenced Docker images and packages. The analysis process runs concurrently across multiple dimensions with support for both OpenAI and Google Gemini models. Results are presented in an interactive interface with side-by-side Dockerfile comparisons, dedicated vulnerability assessment panels, and color-coded highlighting. Navigable recommendation cards provide detailed explanations for each suggestion, including security insights from our enhanced threat intelligence. This approach transforms complex technical analysis into actionable, understandable guidance.
 -->
 
 ---
 
-### AI Capabilities & Prompt Engineering
+### AI Capabilities & Multi-LLM Architecture
+
+#### **Multi-LLM Support** *(NEW)*
+OpenAI GPT & Google Gemini model flexibility
+
+#### **Enhanced Search Intelligence**
+DuckDuckGo + Tavily API for premium security intelligence
 
 #### **Context Management**
-Seamless integration of local + web intelligence
+Seamless integration of local + **multi-source** web intelligence
 
 #### **Technology Awareness**
 Framework-specific optimization strategies
 
-#### **Security Intelligence**
-Current threat landscape integration
-
-#### **Prompt Templates**
-Carefully crafted for containerization expertise
+#### **Vulnerability Intelligence** *(NEW)*
+**Real-time CVE & threat landscape integration**
 
 #### **Progressive Enhancement**
-Continuous quality improvement through multiple sources
+Continuous quality improvement through multiple AI & search providers
 
 <!-- 
-Speaker Notes: Our AI capabilities go far beyond simple code generation. We've implemented sophisticated context management that seamlessly blends local documentation with current web intelligence. The system is technology-aware, meaning it understands the specific requirements and constraints of different frameworks - a Python Flask app gets different optimization strategies than a Node.js React application. Our security intelligence integration ensures recommendations consider current threat landscapes, not just static best practices. This is achieved through carefully crafted prompt templates optimized specifically for containerization expertise. We implement progressive enhancement where analysis quality continuously improves by gathering additional context from multiple sources, ensuring comprehensive coverage of optimization opportunities.
+Speaker Notes: Our AI capabilities have been significantly enhanced with multi-LLM support. Users can now choose between OpenAI GPT models and Google Gemini variants, optimizing for cost, performance, or availability. We've implemented sophisticated context management that seamlessly blends local documentation with multi-source web intelligence from both DuckDuckGo and Tavily APIs. Our new vulnerability intelligence system provides real-time CVE and threat landscape integration, ensuring security recommendations consider current threats. The system is technology-aware, providing framework-specific optimization strategies, and implements progressive enhancement where analysis quality continuously improves by gathering additional context from multiple AI providers and search sources.
 -->
 
 ---
@@ -213,28 +227,31 @@ Suboptimal Python Flask application
 #### **Real-time Analysis** 
 Technology detection and processing
 
-#### **Optimization Results**
-Security, performance, and best practices
+#### **Security, Performance, and Vulnerability Analysis** *(ENHANCED)*
+Comprehensive assessment including **dedicated CVE scanning**
 
 #### **Before/After Comparison**
-Visual improvement demonstration
+Visual improvement demonstration with **security insights**
 
 #### **Interactive Features**
 Recommendation exploration
 
 <!-- 
-Speaker Notes: Let me show you ContainerShip in action. [If doing live demo: demonstrate the actual interface. If not live:] Here's a walkthrough of analyzing a typical suboptimal Python Flask Dockerfile. Notice how the system immediately detects this as a Python Flask application and begins tailored analysis. Within seconds, we see comprehensive results covering security vulnerabilities - like running as root user, performance issues - such as inefficient layer ordering, and best practices violations - like missing health checks. The before-and-after comparison clearly shows the improvements: multi-stage builds reducing image size, proper user management for security, and optimized layer caching for faster builds. Users can click through each recommendation card to understand not just what to change, but why these changes improve their container's security, performance, and maintainability.
+Speaker Notes: Let me show you ContainerShip in action with our enhanced capabilities. [If doing live demo: demonstrate the actual interface. If not live:] Here's a walkthrough of analyzing a typical suboptimal Python Flask Dockerfile. Notice how the system immediately detects this as a Python Flask application and begins tailored analysis with integrated vulnerability scanning. Within seconds, we see comprehensive results including dedicated CVE scanning of base images and packages, security vulnerabilities, performance issues, and best practices violations. The enhanced before-and-after comparison shows not only traditional improvements but also security insights from our vulnerability scanner. Users can explore detailed vulnerability reports alongside optimization recommendations, understanding both how to improve their container and what security risks to address.
 -->
 
 ---
 
 ### Technical Innovation & Advantages
 
-#### **Hybrid Intelligence**
-First platform combining local docs + real-time web search
+#### **Multi-Source Hybrid Intelligence** *(ENHANCED)*
+**Multi-LLM** + local docs + **DuckDuckGo & Tavily APIs**
+
+#### **Integrated Vulnerability Scanning** *(NEW)*
+**Real-time CVE assessment** for Docker images & packages
 
 #### **Extensible Architecture**
-Easy addition of new analysis tools
+Easy addition of new analysis tools & **LLM providers**
 
 #### **Specialized Expertise**
 Purpose-built for containerization vs. generic AI
@@ -242,11 +259,11 @@ Purpose-built for containerization vs. generic AI
 #### **Open Foundation**
 Transparent, community-driven development
 
-#### **Cost-Effective**
-GPT-4o-mini optimization for efficiency
+#### **Cost-Effective Multi-LLM**
+**Flexible provider selection** for optimal cost/performance
 
 <!-- 
-Speaker Notes: What sets ContainerShip apart is our unique combination of technical innovations. We're the first platform to successfully combine comprehensive local documentation with real-time web intelligence in a containerization context. Our extensible MCP-based architecture means new analysis capabilities can be added seamlessly as containerization practices evolve. Unlike generic AI tools, we've built specialized expertise specifically for Docker optimization. Our open foundation approach ensures transparency and community-driven development, avoiding vendor lock-in issues. We've also optimized for cost-effectiveness using GPT-4o-mini while maintaining high-quality analysis through sophisticated prompt engineering.
+Speaker Notes: What sets ContainerShip apart is our unique combination of enhanced technical innovations. We're the first platform to successfully combine multi-LLM support with comprehensive local documentation, real-time web intelligence, and integrated vulnerability scanning. Our extensible MCP-based architecture means new analysis capabilities and LLM providers can be added seamlessly as containerization practices evolve. Unlike generic AI tools, we've built specialized expertise specifically for Docker optimization with dedicated vulnerability assessment. Our open foundation approach ensures transparency and community-driven development, avoiding vendor lock-in issues. We've also optimized for cost-effectiveness with flexible LLM provider selection, allowing users to choose between OpenAI and Google models based on their specific needs.
 -->
 
 ---
@@ -256,43 +273,43 @@ Speaker Notes: What sets ContainerShip apart is our unique combination of techni
 #### **Developer Productivity**
 Reduces research time for Docker best practices
 
-#### **Security Enhancement**
-Proactive vulnerability identification
+#### **Security Enhancement** *(ENHANCED)*
+**Proactive vulnerability identification** with integrated CVE scanning
 
 #### **Cost Optimization**
 Systematic image size and performance improvements
 
 #### **Knowledge Democratization**
-Makes expert containerization accessible
+Makes expert containerization **& security analysis** accessible
 
 #### **Future-Proof**
 Continuous learning from evolving ecosystem
 
 <!-- 
-Speaker Notes: The impact of ContainerShip extends across multiple dimensions of software development. Developer productivity increases significantly by reducing time spent researching Docker best practices - our automated analysis delivers expert-level recommendations instantly. Security posture improves through proactive vulnerability identification with current threat intelligence, catching issues before they reach production. Cost optimization emerges through systematic image size reduction and performance improvements that translate directly to reduced infrastructure costs. Perhaps most importantly, we democratize containerization expertise, making sophisticated optimization knowledge accessible to developers regardless of their Docker experience level. The platform's continuous learning capability ensures recommendations remain current as the containerization ecosystem evolves.
+Speaker Notes: The impact of ContainerShip extends across multiple dimensions of software development. Developer productivity increases significantly by reducing time spent researching Docker best practices - our automated analysis delivers expert-level recommendations instantly. Security posture improves dramatically through our integrated vulnerability scanning with dedicated CVE assessment and current threat intelligence, catching issues before they reach production. Cost optimization emerges through systematic image size reduction and performance improvements that translate directly to reduced infrastructure costs. Perhaps most importantly, we democratize both containerization and security expertise, making sophisticated optimization and vulnerability analysis accessible to developers regardless of their Docker experience level. The platform's continuous learning capability ensures recommendations remain current as the containerization ecosystem evolves.
 -->
 
 ---
 
 ### Future Enhancements & Roadmap
 
-#### **Multi-LLM Support**
-Integration with Claude, Llama, and emerging models
+#### **Extended Multi-LLM Support** *(ENHANCED)*
+Integration with **Claude, Llama**, and emerging models
+
+#### **Advanced Search Intelligence** *(ENHANCED)*  
+Additional premium providers beyond **Tavily** for enterprise features
 
 #### **CI/CD Integration** 
-Automated optimization in development pipelines
+Automated optimization **& vulnerability scanning** in development pipelines
 
 #### **Kubernetes Integration**
 Extended orchestration platform support
 
 #### **Team Collaboration**
-Shared optimization templates and analytics
-
-#### **Enhanced Search**
-Premium intelligence sources for enterprise features
+Shared optimization templates **& security policies**
 
 <!-- 
-Speaker Notes: Looking ahead, our roadmap includes exciting enhancements that will further strengthen ContainerShip's position as the leading containerization optimization platform. We're planning multi-LLM support to integrate with Claude, Llama, and other emerging models, ensuring we always leverage the best AI capabilities available. CI/CD integration will enable automated optimization directly in development pipelines. Kubernetes integration will extend our optimization capabilities to orchestration platforms. Team collaboration features will support shared optimization templates and analytics for enterprise environments. Enhanced search capabilities with premium intelligence sources will provide even more comprehensive analysis for enterprise customers.
+Speaker Notes: Looking ahead, our roadmap includes exciting enhancements that will further strengthen ContainerShip's position as the leading containerization optimization platform. We're expanding our multi-LLM support to include Claude, Llama, and other emerging models, building on our current OpenAI and Google Gemini integration. Advanced search intelligence will include additional premium providers beyond Tavily for enhanced enterprise capabilities. CI/CD integration will enable automated optimization and vulnerability scanning directly in development pipelines. Kubernetes integration will extend our optimization capabilities to orchestration platforms. Team collaboration features will support shared optimization templates and security policies for enterprise environments, enabling organizations to maintain consistent containerization and security standards across teams.
 -->
 
 ---

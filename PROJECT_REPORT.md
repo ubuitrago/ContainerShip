@@ -1,42 +1,33 @@
 # ContainerShip: AI-Powered Docker Optimization Platform
-## Comprehensive Project Report
 ### Uriel Buitrago, Shane Aung
 ### Advanced Programming Tools - Summer 2025
 ---
 
 ## Executive Summary
 
-ContainerShip is an innovative web-based platform that leverages Large Language Models (LLMs) and Model Context Protocol (MCP) to provide intelligent Docker container optimization. The project combines real-time web search capabilities with a comprehensive local knowledge base to deliver cutting-edge containerization recommendations, security analysis, and performance optimization suggestions. Built with a modern tech stack featuring React, FastAPI, and advanced AI integration, ContainerShip represents the next generation of DevOps tooling.
+ContainerShip is an innovative web-based platform that leverages Large Language Models (LLMs) and Model Context Protocol (MCP) to provide intelligent Docker container optimization. The project combines real-time web search capabilities with a local knowledge base to deliver cutting-edge containerization recommendations, security analysis, and performance optimization suggestions. Built with a modern tech stack featuring React, FastAPI, and advanced AI integration, ContainerShip represents the next generation of DevOps tooling.
 
 ---
 
 ## Related Work & Existing Solutions
 
-The containerization optimization landscape encompasses various approaches ranging from static analysis tools to cloud-native security platforms. Understanding the existing ecosystem provides crucial context for ContainerShip's innovative contributions to this rapidly evolving field.
-
 ### Traditional Static Analysis Tools
 
-The Docker ecosystem has historically relied on static analysis tools like Hadolint and Docker Bench for Security that examine Dockerfiles against predefined rulesets. While effective for catching obvious misconfigurations, these tools suffer from limitations in contextual understanding and inability to adapt to evolving best practices without manual rule updates. They excel in identifying syntactic issues and well-known anti-patterns but struggle with technology-specific optimization opportunities and emerging security threats that require contextual analysis beyond simple pattern recognition.
+The Docker ecosystem has historically relied on static analysis tools like Hadolint and Docker Bench for Security that examine Dockerfiles against predefined rulesets. While effective for catching obvious misconfigurations, these tools suffer from limitations in contextual understanding and inability to adapt to evolving best practices without manual updates to the aforementioned rules. They are particularly good at identifying syntactic issues and well-known anti-patterns, but struggle with identifying technology-specific optimization opportunities and emerging security threats that require more than just simple pattern recognition.
 
 ### Commercial Security and Optimization Platforms
 
-Enterprise-grade solutions like Snyk, Aqua Security, and Prisma Cloud have advanced the field through comprehensive vulnerability scanning and runtime security analysis. However, commercial platforms typically focus on security compliance rather than holistic optimization that considers performance, maintainability, and technology-specific best practices. Their proprietary nature limits extensibility and customization, while subscription-based models can present adoption barriers for smaller development teams.
+Enterprise-grade solutions like Snyk, Aqua Security, and Prisma Cloud have advanced the field through vulnerability scanning and runtime security analysis. However, commercial platforms typically focus on security compliance rather than holistic optimization that considers performance, maintainability, and technology-specific best practices. Their proprietary nature limits extensibility and customization, while subscription-based models can present adoption barriers for smaller development teams.
 
 ### AI-Powered DevOps Tools
 
-The emergence of AI-powered development assistance has introduced tools like GitHub Copilot, Amazon CodeWhisperer, and various specialized DevOps assistants that leverage large language models for code generation and optimization suggestions. These tools demonstrate AI-driven development assistance potential but typically operate through general-purpose code completion rather than specialized containerization expertise. Recent developments in AI-powered infrastructure tools like Qovery and Railway automate deployment processes but focus primarily on deployment orchestration rather than container optimization.
-
-### Docker's AI Initiatives
+The emergence of AI-powered development assistance has introduced tools like GitHub Copilot, Amazon CodeWhisperer, and various specialized DevOps assistants that leverage LLMs for code generation and optimization suggestions. These tools demonstrate AI-driven development assistance potential but typically operate through general-purpose code completion rather than specialized containerization expertise. Recent developments in AI-powered infrastructure tools like Qovery and Railway automate deployment processes but focus primarily on deployment orchestration rather than container optimization.
 
 Docker Inc. has incorporated AI-powered features into their platform offerings, including intelligent Dockerfile generation capabilities in Docker Desktop and AI-powered vulnerability analysis in Docker Scout. Docker's AI assistant provides conversational interfaces for containerization guidance within Docker Desktop. However, these integrations primarily focus on individual developer productivity within Docker's ecosystem rather than comprehensive optimization analysis and lack the hybrid knowledge architecture that enables continuous learning from both local documentation and current web intelligence.
 
-### Limitations of Current Approaches
-
-Existing containerization optimization solutions exhibit critical limitations that ContainerShip addresses. Static analysis tools lack contextual awareness of technology stacks and current security landscapes, leading to generic recommendations. Commercial platforms operate as black boxes with limited transparency and vendor lock-in concerns. General-purpose AI tools lack specialized containerization knowledge and cannot access current vulnerability databases or integrate multiple information sources. Docker's AI initiatives, while innovative, remain focused on proprietary ecosystem integration rather than extensible, community-driven development.
-
 ### ContainerShip's Innovation Position
 
-ContainerShip's unique position emerges from its combination of specialized containerization expertise, hybrid knowledge systems, and extensible AI architecture. Unlike static analysis tools, ContainerShip provides contextual, technology-aware analysis. In contrast to commercial platforms and Docker's proprietary initiatives, ContainerShip offers transparent, extensible architecture with open-source foundations. The platform's hybrid approach combines comprehensive local documentation with current web intelligence, ensuring both foundational accuracy and temporal relevance while maintaining independence from proprietary platform constraints.
+ContainerShip's unique position emerges from its combination of specialized containerization expertise, hybrid knowledge systems, and extensible AI architecture. Unlike static analysis tools, ContainerShip provides contextual, technology-aware analysis. In contrast to commercial platforms and Docker's proprietary initiatives, ContainerShip offers transparent, extensible architecture with open-source foundations. The platform's hybrid approach combines local documentation with current web intelligence, ensuring both foundational accuracy and temporal relevance while maintaining independence from proprietary platform constraints.
 
 ---
 
@@ -44,7 +35,7 @@ ContainerShip's unique position emerges from its combination of specialized cont
 
 ### High-Level Architecture
 
-ContainerShip follows a sophisticated three-tier architecture that seamlessly integrates web technologies with AI-powered analysis:
+ContainerShip follows a tiered architecture that integrates web technologies with AI-powered analysis.
 
 ```mermaid
 graph TD
@@ -70,25 +61,23 @@ graph TD
 ```
 
 
-### Component Deep Dive
+### Frontend Layer - React TypeScript Application
 
-#### Frontend Layer - React TypeScript Application
+The user interface is a single-page application built on React with TypeScript, creating an interactive environment for Dockerfile analysis. The frontend displays an uploaded Dockerfile with navigable syntax highlighting and line-by-line recommendations. The interface utilizes intuitive visualization elements to provide warning indicators and clause-based feedback navigation.
 
-The user interface represents a sophisticated single-page application built on React with TypeScript, creating an interactive environment for Docker optimization. The frontend features an advanced Dockerfile editor with real-time syntax highlighting and line-by-line analysis capabilities. The interface employs responsive design principles while dynamic visualization elements provide color-coded warning indicators and intuitive clause-based navigation.
+Real-time updates stream analysis results with visual progress indicators, keeping users informed throughout the optimization process. The technical foundation leverages Vite for fast development cycles and React Markdown with React Syntax Highlighter for rich content display.
 
-The application architecture emphasizes modularity through reusable components such as `ClauseCard` and `DockerfileDisplay`. Real-time updates stream analysis results with comprehensive progress indicators, keeping users informed throughout the optimization process. The technical foundation leverages Vite for fast development cycles, Axios for API communication, and React Markdown with React Syntax Highlighter for rich content display.
+### Backend Layer - FastAPI Server
 
-#### Backend Layer - FastAPI Server
+The backend infrastructure serves as the central orchestration layer, implementing a FastAPI server that bridges user interactions with analysis capabilities. This layer houses the critical MCP (Model Context Protocol) client component that manages all communication with the MCP server, acting as the logical intermediary between user requests and AI-powered analysis tools.
 
-The backend infrastructure serves as the central orchestration layer, implementing a robust FastAPI server that bridges user interactions with AI-powered analysis capabilities. This layer houses the critical MCP (Model Context Protocol) client component that manages all communication with the MCP server, acting as the intelligent intermediary between user requests and AI-powered analysis tools.
+The API handles intelligent file processing by extracting information from a given Dockerfile into dedicated clauses. The integrated MCP client maintains persistent connections to the MCP server, enabling efficient tool invocation and result processing. The API houses the logic to automatically identifying programming languages, frameworks, and deployment patterns from Dockerfile content, which is then passed on to the various AI tools housed in the MCP server for analysis generation.
 
-The server excels in intelligent file processing, implementing advanced Dockerfile parsing algorithms and clause extraction mechanisms. The integrated MCP client maintains persistent connections to the MCP server, enabling efficient tool invocation and result processing. The backend's core strength lies in its technology detection capabilities, automatically identifying programming languages, frameworks, and deployment patterns from Dockerfile content. The MCP client translates these detection results into appropriate tool invocations, coordinating between multiple AI tools to deliver comprehensive analysis results.
+### AI Engine - MCP Server
 
-#### AI Engine - MCP Server
+The Model Context Protocol server represents the generative engine of the ContainerShip platform, implementing a hybrid knowledge system that combines local Retrieval-Augmented Generation (RAG) capabilities with real-time web search intelligence. This architecture enables the platform to draw from both local documentation repositories and current web-based information, ensuring recommendations remain both foundationally sound and relevant with respect to recent trends.
 
-The Model Context Protocol server represents the intellectual core of the ContainerShip platform, implementing a sophisticated hybrid knowledge system that combines local Retrieval-Augmented Generation capabilities with real-time web search intelligence. This architecture enables the platform to draw from both comprehensive local documentation repositories and current web-based information, ensuring recommendations remain both foundationally sound and temporally relevant.
-
-The server employs a multi-tool architecture where specialized tools address different facets of container optimization, from security analysis to performance enhancement. Built on the FastMCP framework, the system maintains extensibility for easy tool addition and modification, allowing the platform to evolve with emerging containerization practices and technologies.
+The server employs a multi-tool architecture where specialized tools address different facets of container optimization, from security analysis to performance enhancement. Built on the FastMCP Python framework, the system maintains extensibility for easy tool addition and modification, allowing the platform to evolve with emerging containerization practices and technologies.
 
 ---
 
@@ -96,17 +85,13 @@ The server employs a multi-tool architecture where specialized tools address dif
 
 ### Dockerfile Analysis Workflow
 
-The ContainerShip analysis workflow represents a carefully orchestrated sequence of intelligent processing stages designed to transform raw Dockerfiles into optimized, secure, and performant container definitions. The process begins with an intuitive file upload interface employing drag-and-drop functionality with comprehensive validation mechanisms. Users receive immediate feedback regarding file format compliance while real-time content preview with syntax highlighting provides instant visual confirmation.
+The ContainerShip analysis workflow represents a sequence of processing stages designed to parse raw Dockerfiles and turn them into optimized, secure, and performant container definitions. Users enter this workflow by uploading a Dockerfile to the frontend. Upon doing so, users will first receive immediate feedback regarding file format compliance in the form of a view of the file contents with syntax highlighting shown to break down the identified clauses in the file. A carousel view of the pending recommendations for each clause is shown immediately underneath and is waiting for information to be synchronously streamed.
 
-Upon successful upload, the FastAPI backend's integrated MCP client initiates an intelligent analysis pipeline that automatically detects the underlying technology stack, whether Python Flask applications, Node.js React frontends, Java Spring services, or Go microservices. The analysis process employs concurrent processing techniques through coordinated MCP tool invocations to simultaneously evaluate security vulnerabilities, performance optimization opportunities, and adherence to containerization best practices.
+After this, the FastAPI backend's integrated MCP client initiates an analysis pipeline that automatically detects the underlying technology stack (Python Flask applications, Node.js React frontends, Java Spring services, Go microservices, etc). The analysis process employs concurrent processing techniques through coordinated MCP tool invocations to simultaneously evaluate security vulnerabilities, performance optimization opportunities, and adherence to containerization best practices.
 
-Results presentation follows a sophisticated interactive model featuring side-by-side comparisons of original and optimized Dockerfiles. Color-coded line highlighting immediately draws attention to problematic areas, while navigable recommendation cards provide detailed explanations accessible through intuitive user interface controls. The platform's comprehensive recommendation engine delivers security vulnerability assessments enhanced with current threat intelligence, performance optimization strategies based on industry best practices, and multi-stage build recommendations for image size reduction.
+The platform's vulnerability analysis workflow represents a security assessment pipeline that automatically extracts Docker image references and package installations from the uploaded Dockerfile. This system performs vulnerability research using open-source security advisories using web searches through both DuckDuckGo (baseline) and Tavily (enhanced) API queries.
 
-### Advanced Features
-
-ContainerShip's advanced feature set distinguishes it from conventional static analysis tools through its integration of real-time web intelligence with local knowledge repositories. The platform maintains awareness of current Docker best practices and security updates through continuous web monitoring, ensuring recommendations reflect the rapidly evolving containerization ecosystem rather than static documentation snapshots.
-
-Technology-aware analysis represents another significant advancement, where the system tailors recommendations based on detected programming languages, frameworks, and deployment patterns. The platform implements progressive enhancement principles where analysis quality continuously improves through additional context gathering from web search results, ensuring comprehensive coverage through multiple information sources.
+The user is finally presented with both the original and optimized Dockerfiles, complemented by dedicated vulnerability assessment panels and clause recommendation cards mapped to highlighted lines. The platform's recommendation engine delivers a Dockerfile that has been augmented with enhancements based on current threat intelligence, performance optimization strategies backed by industry best practices, and multi-stage build recommendations for image size reduction.
 
 ---
 
@@ -114,33 +99,35 @@ Technology-aware analysis represents another significant advancement, where the 
 
 ### MCP Tools Ecosystem
 
-ContainerShip implements a sophisticated suite of Model Context Protocol tools, each engineered for specific containerization analysis and optimization tasks. This ecosystem represents a careful balance between specialized functionality and integrated operation, enabling comprehensive Docker analysis through coordinated tool interactions.
+ContainerShip implements a suite of Model Context Protocol tools, each engineered for specific containerization analysis and optimization tasks. This ecosystem represents a balance between specialized functionality and integrated operation, resulting in a general Docker analysis through coordinated tool interactions.
 
-The `docker_docs` tool serves as the foundation of the local knowledge system, leveraging a comprehensive RAG implementation built upon extensive Docker documentation. This tool employs ChromaDB as its vector database foundation, utilizing OpenAI embeddings for semantic similarity matching. The system implements recursive character text splitting with carefully optimized chunk sizes to ensure optimal information retrieval while maintaining contextual coherence.
+The `docker_docs` tool serves as the foundation of the local knowledge system, leveraging a RAG implementation built upon extensive Docker documentation. This tool employs ChromaDB as its vector database foundation, utilizing OpenAI embeddings for semantic similarity matching. The system implements recursive character text splitting with carefully optimized chunk sizes to ensure optimal information retrieval while maintaining contextual coherence.
 
-The `web_search_docker` tool complements local knowledge with real-time web intelligence, implementing sophisticated search strategies through DuckDuckGo integration. This tool performs intelligent query optimization specifically designed for Docker-related searches, excelling in security vulnerability research, performance optimization technique discovery, and identification of deprecated functionality warnings alongside emerging best practices.
+The `web_search_docker` tool complements local knowledge with real-time web search, using DuckDuckGo API integration and auxiliary Tavily API for premium search capabilities. The tool performs query optimization specifically designed for Docker-related searches, excelling in security vulnerability research, performance optimization technique discovery, and identification of deprecated functionality warnings alongside emerging best practices.
 
-The `optimize_dockerfile` tool orchestrates multi-layered analysis combining local knowledge repositories with current web research. This tool implements technology-specific optimization strategies and addresses critical optimization dimensions including base image selection strategies, layer reduction techniques, security hardening, and multi-stage build implementation. The `search_dockerfile_examples` tool provides access to current, community-validated containerization patterns, while the `check_security_best_practices` tool evaluates Dockerfiles against contemporary security standards through integration with web-based vulnerability databases.
+The `optimize_dockerfile` tool orchestrates multi-layered analysis combining local knowledge repositories with current web research. This tool implements technology-specific optimization strategies and addresses critical optimization dimensions including base image selection strategies, layer reduction techniques, security hardening, and multi-stage build implementation. 
+
+The `search_dockerfile_examples` tool provides access to current, community-validated containerization patterns, while the `check_security_best_practices` tool evaluates Dockerfiles against contemporary security standards through integration with web-based vulnerability databases.
 
 ### MCP Architecture Benefits
 
 The Model Context Protocol integration, facilitated through the embedded MCP client within the FastAPI backend, delivers significant architectural advantages that position ContainerShip for long-term scalability and maintainability. The modular design ensures that each MCP tool serves a specific purpose while maintaining seamless interoperability through the centralized MCP client. This client-server architectural approach enables system scalability where new MCP tools can be incorporated on the server side without disrupting existing client functionality.
 
-Maintainability benefits emerge through clear separation of concerns between the MCP client and MCP server, with standardized protocol interfaces that simplify debugging and enhancement processes. The built-in MCP Inspector provides comprehensive debugging support, allowing developers to examine client-server communications and tool interactions. This combination of modularity, scalability, maintainability, and debugging capability creates a robust foundation for sophisticated containerization analysis.
+Maintainability benefits emerge through clear separation of concerns between the MCP client and MCP server, with standardized protocol interfaces that simplify debugging and enhancement processes. The built-in MCP Inspector included in FastMCP provides accessible debugging support, allowing developers to examine client-server communications and tool interactions.
 
 ---
 
-## LLM-Based Features & AI Capabilities
+## Language Model Integration
 
-### Advanced Language Model Integration
+### Exploration of Multiple LLMs
 
-#### GPT-4o-mini Integration Architecture
+ContainerShip features a multi-LLM architecture that allows the developer to set either OpenAI GPT or Google Gemini models as the LLM powering the overall application, providing the flexibility to choose a preferred AI provider based on cost, performance, and availability. 
 
-ContainerShip leverages OpenAI's GPT-4o-mini through multiple carefully designed integration points that maximize the model's analytical capabilities while maintaining cost-effectiveness and response speed. The integration architecture centers on five primary functions: contextual analysis for deep understanding of Dockerfile intent and purpose, sophisticated recommendation generation tailored to specific use cases, security assessment that evaluates vulnerabilities within current threat contexts, code generation for optimized Dockerfile versions, and explanation synthesis that transforms complex technical analysis into user-friendly recommendations.
+In our development process, we tested using GPT-4o-mini and Gemini-2.5-Flash. There were noticeable differences in the performance of ContainerShip between the two models. Overall, GPT-4o-mini provided more reasonable and useful clause recommendations and generated optimized Dockerfiles of higher quality compared to Gemini-2.5-Flash; the content generated by Gemini tended to be more superfluous. GPT also generated results faster than Gemini.
 
-#### Sophisticated Prompt Engineering
+### Prompt Engineering
 
-The platform's prompt engineering strategy represents a sophisticated approach to context management that seamlessly blends multiple information sources into coherent, actionable guidance. The RAG-enhanced prompting system employs carefully crafted templates that prioritize local documentation context while intelligently integrating current web search results to ensure temporal relevance.
+The RAG-enhanced prompting system uses detailed templates that prioritize local documentation context while intelligently integrating current web search results to ensure relevance, thereby approaching context management in a blended manner. Below is an example of one of the templates used in ContainerShip.
 
 ```python
 RAG_TEMPLATE = """
@@ -164,53 +151,27 @@ Instructions:
 """
 ```
 
-The multi-context integration approach represents a breakthrough in information synthesis, where the system harmoniously combines local documentation repositories with real-time web search results. Technology-specific knowledge integration ensures that recommendations consider the unique requirements and constraints of different development frameworks, while security intelligence integration weaves vulnerability assessment data throughout the analysis process.
-
-#### Intelligent Technology Detection
-
-The platform implements sophisticated technology detection algorithms that analyze Dockerfile content to automatically identify underlying technology stacks and deployment patterns. This automated recognition capability extends far beyond simple keyword matching to understand the contextual relationships between base images, package managers, framework dependencies, and deployment configurations.
-
-The detection system excels in primary language identification across diverse ecosystems including Python, Node.js, Java, Go, Rust, PHP, and Ruby, while simultaneously recognizing framework-specific patterns such as Flask, Django, FastAPI for Python, or React, Express for Node.js environments. This technology awareness enables the generation of highly targeted recommendations that consider the specific requirements, performance characteristics, and security considerations associated with each development framework.
-
-#### Advanced Analysis Pipeline
-
-The ContainerShip analysis pipeline represents a sophisticated multi-stage processing system designed to maximize analysis quality while maintaining responsive user experience. The pipeline begins with comprehensive preprocessing that normalizes content structure and performs initial analysis to establish processing parameters. Context gathering represents a critical stage where parallel execution of RAG queries and web searches provides comprehensive information foundation for analysis.
-
-The LLM analysis stage processes this enriched context through GPT-4o-mini, leveraging advanced prompt engineering to generate targeted recommendations. Post-processing stages focus on formatting optimization and recommendation enhancement, ensuring that AI-generated insights translate into actionable implementation guidance. The pipeline's streaming analysis capabilities provide real-time progress updates during extended processing operations, maintaining user engagement through incremental result delivery.
-
 ---
 
-## Technical Innovation & Future Potential
-
-### Cutting-Edge Features
-
-ContainerShip's hybrid AI architecture represents a pioneering approach to AI-powered DevOps tooling that successfully combines the reliability of local knowledge bases with the currency of real-time web intelligence. This architecture delivers consistent, foundational information through comprehensive local documentation while simultaneously providing access to current best practices and emerging security considerations through dynamic web search capabilities.
-
-The platform's web-enhanced RAG system sets new standards for information retrieval in technical domains through dynamic context switching between local and web sources based on query characteristics and temporal relevance. Intelligent source prioritization algorithms determine the most appropriate information sources for specific query types, while multi-source synthesis capabilities enable comprehensive recommendations that draw from multiple information streams.
+## Future Possibilities
 
 ### Scalability & Extensibility
 
-The modular architecture foundation enables seamless integration of additional AI models beyond GPT-4o-mini, including Claude, Llama, and other emerging language models. Pluggable search provider architecture extends beyond current DuckDuckGo integration to accommodate additional intelligence sources, while the extensible tool framework supports specialized analysis types for emerging containerization patterns.
+The modular architecture foundation enables seamless integration of additional AI models beyond current OpenAI GPT and Google Gemini support, including Claude, Llama, and other emerging language models. Pluggable search provider architecture extends beyond current DuckDuckGo and Tavily integrations to accommodate additional intelligence sources, while the extensible tool framework supports specialized analysis types for emerging containerization patterns.
 
-Future enhancement opportunities include enhanced search capabilities with additional providers such as Tavily API for premium search results, comprehensive CI/CD pipeline integration for automated Dockerfile optimization, team collaboration features supporting shared optimization templates, advanced analytics enabling optimization tracking over time, and integration with container orchestration platforms including Kubernetes and Docker Swarm.
+Future enhancement opportunities include enhanced search capabilities with additional premium providers beyond Tavily for enterprise-grade intelligence, CI/CD pipeline integration for automated Dockerfile optimization, team collaboration features supporting shared optimization templates, and advanced analytics enabling optimization tracking over time.
 
 ### Industry Impact
 
 ContainerShip addresses critical pain points that significantly impact modern software development productivity and operational efficiency. The platform reduces time spent researching Docker best practices through intelligent automation that delivers contextually relevant guidance, while enhancing security posture through proactive vulnerability identification and current threat intelligence integration.
 
-Cost optimization benefits emerge through systematic image size reduction strategies and performance improvements that translate into reduced infrastructure costs. The platform democratizes Docker expertise by making sophisticated containerization knowledge accessible to developers across different experience levels, reducing the learning curve for containerization adoption while ensuring adherence to best practices. The continuous learning capability ensures that platform recommendations remain current with the rapidly evolving containerization landscape.
+Cost optimization benefits emerge through systematic image size reduction strategies and performance improvements that translate into reduced infrastructure costs. The platform democratizes Docker expertise by making complicated containerization knowledge accessible to developers across different experience levels, reducing the learning curve for containerization adoption while ensuring adherence to best practices. The continuous learning capability ensures that platform recommendations remain current with the rapidly evolving containerization landscape.
 
 ---
 
 ## Conclusion
 
-ContainerShip represents a significant advancement in AI-powered development tooling, successfully bridging the gap between traditional documentation-based learning and real-time, intelligent assistance. The project's sophisticated architecture, comprehensive feature set, and innovative use of cutting-edge AI technologies position it as a transformative tool for modern software development teams.
-
-The platform's combination of local knowledge bases, real-time web intelligence, and advanced LLM integration creates a uniquely powerful system for Docker optimization. Its extensible architecture ensures long-term viability and adaptability to emerging containerization technologies and practices.
-
-As containerization continues to dominate modern software deployment strategies, tools like ContainerShip will become increasingly essential for maintaining competitive advantage in software development lifecycle optimization. The project stands as a testament to the potential of AI-augmented development tools and sets a new standard for intelligent DevOps assistance.
-
-Through its comprehensive approach to Docker optimization, user-centric design, and technical innovation, ContainerShip not only solves current containerization challenges but also provides a foundation for future advancements in AI-powered software development tooling.
+ContainerShip represents a step forward in AI-powered development tooling, successfully bridging the gap between traditional documentation-based learning and real-time, intelligent assistance. The platform's combination of local knowledge bases, real-time web intelligence, and advanced LLM integration creates a uniquely powerful system for Docker optimization. Its extensible architecture ensures long-term viability and adaptability to emerging containerization technologies and practices as well as new MCP tools. As containerization continues to dominate modern software deployment strategies, tools like ContainerShip will become increasingly essential for maintaining competitive advantage in software development lifecycle optimization.
 
 ---
 
@@ -225,8 +186,6 @@ Through its comprehensive approach to Docker optimization, user-centric design, 
 
 2. **FastAPI and Backend Technologies**
    - [FastAPI Documentation](https://fastapi.tiangolo.com/) - RESTful API design and implementation patterns
-   - [Python async/await Documentation](https://docs.python.org/3/library/asyncio.html) - Asynchronous processing implementation
-   - [FastAPI CORS Documentation](https://fastapi.tiangolo.com/tutorial/cors/) - Cross-origin resource sharing setup
 
 3. **AI and Machine Learning Integration**
    - [OpenAI API Documentation](https://platform.openai.com/docs/) - Language model integration and prompt engineering
@@ -252,6 +211,7 @@ Through its comprehensive approach to Docker optimization, user-centric design, 
 
 7. **Search and Web Intelligence**
    - [DuckDuckGo Search API](https://duckduckgo.com/api) - Privacy-focused web search integration
+   - [Tavily API](https://tavily.com/) - Premium AI-powered search API for enhanced security intelligence
    - [Web Scraping Best Practices](https://scrapfly.io/web-scraping/web-scraping-best-practices/) - Real-time information gathering techniques
    - [Search Engine Optimization Research](https://moz.com/beginners-guide-to-seo) - Search result filtering and relevance scoring
 
@@ -259,12 +219,9 @@ Through its comprehensive approach to Docker optimization, user-centric design, 
 
 8. **Retrieval-Augmented Generation (RAG)**
    - [RAG Paper - Lewis et al. 2020](https://arxiv.org/abs/2005.11401) - Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
-   - [Vector Database Design](https://weaviate.io/blog/what-is-a-vector-database) - Vector database architecture and implementation
    - [Prompt Engineering Guide](https://www.promptingguide.ai/) - Context-aware prompt engineering techniques
 
 9. **DevOps and Container Optimization**
     - [Container Security Guide](https://www.nist.gov/publications/application-container-security-guide) - NIST container security best practices
     - [Docker Multi-stage Builds](https://docs.docker.com/develop/dev-best-practices/) - Multi-stage builds and image optimization
     - [Container Performance Optimization](https://kubernetes.io/docs/concepts/cluster-administration/system-logs/) - Performance strategies for containerized applications
-
-This comprehensive analysis was conducted through direct examination of the ContainerShip codebase, supplemented by industry knowledge of containerization tools, AI-powered development platforms, and software architecture best practices referenced above.
