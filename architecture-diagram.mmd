@@ -1,0 +1,22 @@
+```mermaid
+graph TD
+    A[React UI<br/>Frontend] <--> B[FastAPI Backend<br/>with MCP Client]
+    B <--> C[MCP Server<br/>AI Engine]
+    
+    C --> D[Local RAG<br/>ChromaDB]
+    C --> E[Web Search<br/>DuckDuckGo]
+    C --> F[LLM<br/>GPT-4o-mini]
+    
+    style A fill:#2496ed,stroke:#00d4ff,stroke-width:3px,color:#ffffff
+    style B fill:#1e3a8a,stroke:#00d4ff,stroke-width:3px,color:#ffffff
+    style C fill:#0f1419,stroke:#2496ed,stroke-width:3px,color:#ffffff
+    style D fill:#2496ed,stroke:#00d4ff,stroke-width:2px,color:#ffffff
+    style E fill:#1e3a8a,stroke:#00d4ff,stroke-width:2px,color:#ffffff
+    style F fill:#0f1419,stroke:#2496ed,stroke-width:2px,color:#ffffff
+    
+    linkStyle 0 stroke:#00d4ff,stroke-width:3px
+    linkStyle 1 stroke:#00d4ff,stroke-width:3px
+    linkStyle 2 stroke:#00d4ff,stroke-width:2px
+    linkStyle 3 stroke:#00d4ff,stroke-width:2px
+    linkStyle 4 stroke:#00d4ff,stroke-width:2px
+```

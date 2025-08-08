@@ -55,13 +55,20 @@ graph TD
     C --> E[Web Search<br/>DuckDuckGo]
     C --> F[LLM<br/>GPT-4o-mini]
     
-    style A fill:#61dafb,stroke:#333,stroke-width:2px,color:#000
-    style B fill:#009688,stroke:#333,stroke-width:2px,color:#fff
-    style C fill:#ff6b6b,stroke:#333,stroke-width:2px,color:#fff
-    style D fill:#4ecdc4,stroke:#333,stroke-width:2px,color:#000
-    style E fill:#45b7d1,stroke:#333,stroke-width:2px,color:#fff
-    style F fill:#96ceb4,stroke:#333,stroke-width:2px,color:#000
+    style A fill:#2496ed,stroke:#00d4ff,stroke-width:3px,color:#ffffff
+    style B fill:#1e3a8a,stroke:#00d4ff,stroke-width:3px,color:#ffffff
+    style C fill:#0f1419,stroke:#2496ed,stroke-width:3px,color:#ffffff
+    style D fill:#2496ed,stroke:#00d4ff,stroke-width:2px,color:#ffffff
+    style E fill:#1e3a8a,stroke:#00d4ff,stroke-width:2px,color:#ffffff
+    style F fill:#0f1419,stroke:#2496ed,stroke-width:2px,color:#ffffff
+    
+    linkStyle 0 stroke:#00d4ff,stroke-width:3px
+    linkStyle 1 stroke:#00d4ff,stroke-width:3px
+    linkStyle 2 stroke:#00d4ff,stroke-width:2px
+    linkStyle 3 stroke:#00d4ff,stroke-width:2px
+    linkStyle 4 stroke:#00d4ff,stroke-width:2px
 ```
+
 
 ### Component Deep Dive
 
